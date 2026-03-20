@@ -8,8 +8,10 @@ import mirunq_png.perfumeapp.model.NoteLayer;
 import mirunq_png.perfumeapp.model.Perfume;
 import mirunq_png.perfumeapp.db.DatabaseConnection;
 
-public class Main {
-    public static void main(String[] args) {
+public class Main
+{
+    public static void main(String[] args)
+    {
         Perfume toy2 = new Perfume("Moschino", "Toy 2 Bubblegum", 100);
 
         toy2.addNote(new Note("Candied Fruits", NoteLayer.TOP));
@@ -21,19 +23,17 @@ public class Main {
         toy2.addNote(new Note("Musk", NoteLayer.BASE));
 
         System.out.println("--- Perfume Application Initialized ---");
-        toy2.displayProfile();
+        System.out.println(toy2);
 
         try
         {
             Connection con=DatabaseConnection.getInstance().getConnection();
-            if (con!=null&&!con.isClosed()) {
-                System.out.println("Succesfully connected to database!");
-            }
+            if (con!=null&&!con.isClosed())
+                System.out.println("Successfully connected to database!");
         } catch (SQLException e)
         {
             System.err.println("Database error "+ e.getMessage());
             e.printStackTrace();
         }
-
     }
 }

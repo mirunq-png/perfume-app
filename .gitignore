@@ -39,3 +39,4 @@ src/main/resources/config.properties
 src/main/resources/db.sql
 src/main/resources/toImport.xlsx
 src/main/resources/~$toImport.xlsx
+src/main/resources/inserts.sql

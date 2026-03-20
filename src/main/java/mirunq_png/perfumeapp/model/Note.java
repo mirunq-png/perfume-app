@@ -1,10 +1,12 @@
 package mirunq_png.perfumeapp.model;
 
-public class Note {
+public class Note
+{
     private final String name;
     private final NoteLayer layer;
 
-    public Note(String name, NoteLayer layer) {
+    public Note(String name, NoteLayer layer)
+    {
         this.name = name;
         this.layer = layer;
     }
@@ -13,7 +15,8 @@ public class Note {
     public NoteLayer getLayer() { return layer; }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return name + " (" + layer + ")";
     }
 }
