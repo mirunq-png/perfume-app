@@ -2,15 +2,18 @@
 > This app is currently **still in development**.
 
 ---
+<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/0138b7b0-8bd7-4c36-a1d5-a87dad266ba1" /> <img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/b0d9776e-ce97-45a8-91d5-a58e6951cbec" /><img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/92085f24-28f3-45b8-983d-a2da08835e84" />
+
+
 
 ## Prerequisites
 
 To run this application locally, you will need to set up your environment and database connection. This includes:
 * IntelliJ Idea (I'm using version 2025.3.3)
-* sqldeveloper (for creating your database)
+* sqldeveloper (for creating your Oracle database)
 
 ### 1. Database Setup
-The app uses an **Oracle Database**. To set up the schema, use the following files:
+To set up the schema, use the following files:
 * `db.sql`: The database skeleton (tables and schema).
 * `inserts.sql`: An example file for initial data inserts.
   
