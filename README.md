@@ -1,5 +1,5 @@
 > [!IMPORTANT]  
-> This app is currently **still in development**.
+> This app is currently still in development.
 
 ---
 <img width="150" height="250" alt="image" src="https://github.com/user-attachments/assets/0138b7b0-8bd7-4c36-a1d5-a87dad266ba1" /> <img width="150" height="250" alt="image" src="https://github.com/user-attachments/assets/b0d9776e-ce97-45a8-91d5-a58e6951cbec" /><img width="150" height="250" alt="image" src="https://github.com/user-attachments/assets/92085f24-28f3-45b8-983d-a2da08835e84" />
@@ -20,6 +20,8 @@ To set up the schema, use the following files:
 *Note: Will be added soon.*
 ### 2. Configuration
 You will need a `resources` folder in the root directory. Inside, create a `config` file containing your Oracle Database authentication details.
+
+<img width="190" height="93" alt="image" src="https://github.com/user-attachments/assets/46130851-619f-4790-b20e-d8246091ad19" />
 
 *Note: A template will be added soon.*
 
