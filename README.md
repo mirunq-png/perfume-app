@@ -2,7 +2,7 @@
 > This app is currently **still in development**.
 
 ---
-<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/0138b7b0-8bd7-4c36-a1d5-a87dad266ba1" /> <img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/b0d9776e-ce97-45a8-91d5-a58e6951cbec" /><img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/92085f24-28f3-45b8-983d-a2da08835e84" />
+<img width="150" height="250" alt="image" src="https://github.com/user-attachments/assets/0138b7b0-8bd7-4c36-a1d5-a87dad266ba1" /> <img width="150" height="250" alt="image" src="https://github.com/user-attachments/assets/b0d9776e-ce97-45a8-91d5-a58e6951cbec" /><img width="150" height="250" alt="image" src="https://github.com/user-attachments/assets/92085f24-28f3-45b8-983d-a2da08835e84" />
 
 
 
