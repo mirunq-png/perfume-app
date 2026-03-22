@@ -2,7 +2,6 @@
 > This app is currently **still in development**.
 
 ---
-A specialized application for managing your perfume collection and discovering the perfect scent combinations.
 
 ## Prerequisites
 
