@@ -58,7 +58,7 @@ public class PerfumeRepository
 
     public int getPerfumeIdByName(String name)
     {
-        String sql = "SELECT parfum_id FROM prfm_parfumuri WHERE UPPER(nume_parfum) = UPPER(?) AND p.activ=1";
+        String sql = "SELECT parfum_id FROM prfm_parfumuri WHERE UPPER(nume_parfum) = UPPER(?) AND activ=1";
         Connection conn = dbConnection.getConnection();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql))
