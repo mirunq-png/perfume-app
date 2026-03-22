@@ -114,8 +114,7 @@ public class Perfume
         double typeCompatibilityScore = calculateTypeCompatibility(candidate);
         double seasonScore = calculateSeasonOverlap(candidate);
 
-        return (pyramidScore * 0.35) + (sharedNotesScore * 0.25) +
-                (typeCompatibilityScore * 0.25) + (seasonScore * 0.15);
+        return (pyramidScore * 0.35) + (sharedNotesScore * 0.25) + (typeCompatibilityScore * 0.25) + (seasonScore * 0.15);
     }
 
     /**
@@ -127,53 +126,34 @@ public class Perfume
      */
     public double calculatePyramidComplementarity(Perfume candidate)
     {
-        long thisBaseCount = notes.stream()
-                .filter(n -> n.getLayer() == NoteLayer.BASE)
-                .count();
+        long thisTop = notes.stream().filter(n -> n.getLayer() == NoteLayer.TOP).count();
+        long thisMid = notes.stream().filter(n -> n.getLayer() == NoteLayer.HEART).count();
+        long thisBase = notes.stream().filter(n -> n.getLayer() == NoteLayer.BASE).count();
 
-        long thisMidCount = notes.stream()
-                .filter(n -> n.getLayer() == NoteLayer.HEART)
-                .count();
+        long candTop = candidate.getNotes().stream().filter(n -> n.getLayer() == NoteLayer.TOP).count();
+        long candMid = candidate.getNotes().stream().filter(n -> n.getLayer() == NoteLayer.HEART).count();
+        long candBase = candidate.getNotes().stream().filter(n -> n.getLayer() == NoteLayer.BASE).count();
 
-        long thisTopCount = notes.stream()
-                .filter(n -> n.getLayer() == NoteLayer.TOP)
-                .count();
+        // Check if they fill each other's gaps regardless of which one is the "base" perfume
+        boolean baseMeetsTop = (thisBase > 0 && candTop > 0) || (candBase > 0 && thisTop > 0);
+        boolean baseMeetsMid = (thisBase > 0 && candMid > 0) || (candBase > 0 && thisMid > 0);
 
-        long candidateTopCount = candidate.notes.stream()
-                .filter(n -> n.getLayer() == NoteLayer.TOP)
-                .count();
+        // Are they clashing? (Both strictly base-heavy with no top notes between them to balance)
+        boolean bothStrictlyBase = (thisBase > thisTop && candBase > candTop) && (thisTop == 0 && candTop == 0);
 
-        long candidateMidCount = candidate.notes.stream()
-                .filter(n -> n.getLayer() == NoteLayer.HEART)
-                .count();
-
-        long candidateBaseCount = candidate.notes.stream()
-                .filter(n -> n.getLayer() == NoteLayer.BASE)
-                .count();
-
-        // Perfect: This BASE-heavy and Candidate TOP-heavy
-        if (thisBaseCount > thisMidCount && thisBaseCount > thisTopCount &&
-                candidateTopCount > candidateMidCount && candidateTopCount > candidateBaseCount) {
-            return 1.0;
+        if (bothStrictlyBase) {
+            return 0.25; // Clashing / too heavy
         }
-
-        // Good: This has BASE and Candidate has TOP
-        if (thisBaseCount > 0 && candidateTopCount > 0) {
-            return 0.75;
+        if (baseMeetsTop && (thisMid > 0 || candMid > 0)) {
+            return 1.0; // Perfect: Together they cover Top, Mid, and Base!
         }
-
-        // Okay: This has BASE and Candidate has MIDDLE
-        if (thisBaseCount > 0 && candidateMidCount > 0) {
-            return 0.5;
+        if (baseMeetsTop) {
+            return 0.75; // Good: Top and Base covered
         }
-
-        // Poor: Both BASE-heavy (conflicting)
-        if ((thisBaseCount > 0 && candidateBaseCount > candidateMidCount &&
-                candidateBaseCount > candidateTopCount)) {
-            return 0.25;
+        if (baseMeetsMid) {
+            return 0.5; // Okay: Base and Mid covered
         }
-
-        return 0.4; // Neutral
+        return 0.4; // Neutral fallback
     }
 
     /**
@@ -182,19 +162,10 @@ public class Perfume
      */
     public double calculateSharedNotes(Perfume candidate)
     {
-        if (this.notes.isEmpty() || candidate.notes.isEmpty()) {
-            return 0.0;
-        }
-
-        long sharedCount = this.notes.stream()
-                .map(n -> n.getName().toUpperCase())
-                .filter(noteName -> candidate.notes.stream()
-                        .map(n -> n.getName().toUpperCase())
-                        .anyMatch(otherNote -> otherNote.equals(noteName)))
-                .count();
-
-        double similarity = (double) sharedCount / Math.max(this.notes.size(), candidate.notes.size());
-        return similarity;
+        long sharedCount = countSharedNotes(candidate);
+        if (sharedCount >= 2) return 1.0; // Incredible similarity
+        if (sharedCount == 1) return 0.6; // Great anchor point
+        return 0.0;
     }
 
     /**
@@ -253,18 +224,25 @@ public class Perfume
      */
     public String getLayeringExplanation(Perfume candidate)
     {
-        NoteLayer thisDominant = this.getDominantLayer();
-        NoteLayer candidateDominant = candidate.getDominantLayer();
+        StringBuilder explanation = new StringBuilder();
+        double pyramidScore = calculatePyramidComplementarity(candidate);
+        if (pyramidScore == 1.0)
+            explanation.append("Perfect Pyramid (Covers Top, Mid, Base). ");
+        else if (pyramidScore == 0.75)
+            explanation.append("Great Top & Base balance. ");
 
-        if (thisDominant == NoteLayer.BASE && candidateDominant == NoteLayer.TOP)
-            return "Perfect: " + this.name + " (BASE) + " + candidate.name + " (TOP)";
-        else if (thisDominant == NoteLayer.BASE && candidateDominant == NoteLayer.HEART)
-            return "Good: " + this.name + " (BASE) + " + candidate.name + " (HEART)";
-        else
-        {
-            long shared = countSharedNotes(candidate);
-            return "Compatible: " + shared + " shared notes";
-        }
+        double typeScore = calculateTypeCompatibility(candidate);
+        if (typeScore == 1.0)
+            explanation.append("Flawless EDP + BM combo. ");
+        long shared = countSharedNotes(candidate);
+        if (shared >= 2)
+            explanation.append("Incredible bond (").append(shared).append(" shared notes). ");
+        else if (shared == 1)
+            explanation.append("Anchored by 1 shared note. ");
+        // If it somehow scored well but didn't trigger the above texts, give a nice default
+        if (explanation.length() == 0)
+            return "Compatible based on season and overall profile.";
+        return explanation.toString().trim();
     }
 
     /**
