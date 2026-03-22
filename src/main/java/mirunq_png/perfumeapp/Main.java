@@ -12,18 +12,6 @@ public class Main
 {
     public static void main(String[] args)
     {
-//        Perfume toy2 = new Perfume("Moschino", "Toy 2 Bubblegum", 100, Type.EDP);
-//
-//        toy2.addNote(new Note("Candied Fruits", NoteLayer.TOP));
-//        toy2.addNote(new Note("Bitter Orange", NoteLayer.TOP));
-//        toy2.addNote(new Note("Lemon", NoteLayer.TOP));
-//
-//        toy2.addNote(new Note("Bubblegum", NoteLayer.HEART));
-//
-//        toy2.addNote(new Note("Musk", NoteLayer.BASE));
-//        toy2.addSeason(Season.SUMMER);
-//        toy2.addSeason(Season.SPRING);
-//        System.out.println(toy2);
         System.out.println("--- Perfume Application Initializing ---");
         DatabaseConnection dbCon = null;
         try {
@@ -47,11 +35,11 @@ public class Main
             System.out.println("1. View all perfumes");
             System.out.println("2. Search by note");
             System.out.println("3. Get layering recommendations");
-            System.out.println("4. Exit");
+            System.out.println("4. Add a new perfume");
+            System.out.println("5. Disable a perfume");
+            System.out.println("0. Exit");
             System.out.print("Choose an option: ");
-
             String choice = scanner.nextLine();
-
             switch (choice)
             {
                 case "1":
@@ -60,13 +48,13 @@ public class Main
                     if (allPerfumes.isEmpty()) {
                         System.out.println("No perfumes found in the database.");
                     } else {
-                        for (Perfume p : allPerfumes) {
+                        for (Perfume p : allPerfumes)
+                        {
                             System.out.println(p);
                             System.out.println("-".repeat(40));
                         }
                     }
                     break;
-
                 case "2":
                     System.out.print("\nEnter note to search (e.g., VANILLA, MUSK): ");
                     String searchNote = scanner.nextLine();
@@ -76,13 +64,13 @@ public class Main
                     else
                     {
                         System.out.println("\n--- Search Results ---");
-                        for (Perfume p : foundPerfumes) {
+                        for (Perfume p : foundPerfumes)
+                        {
                             System.out.println(p.toString().split("\n")[0]);
                             System.out.println("-".repeat(40));
                         }
                     }
                     break;
-
                 case "3":
                     System.out.print("\nEnter the NAME of your base perfume: ");
                     String baseName = scanner.nextLine();
@@ -94,17 +82,14 @@ public class Main
                         Perfume basePerfume = repository.getPerfumeById(baseId);
                         List<Perfume> catalog = repository.getAllPerfumes();
                         int maxx = catalog.size() - 1;
-
                         if (maxx <= 0)
                             System.out.println("Your database is too lonely! Add more perfumes to get layering suggestions.");
                         else
                         {
                             System.out.print("How many recommendations would you like? (Max available: " + maxx + "): ");
                             int limit = 3;
-
                             try {
                                 limit = Integer.parseInt(scanner.nextLine());
-
                                 if (limit > maxx)
                                 {
                                     System.out.println("You only have " + maxx + " other perfumes. Setting limit to " + maxx + ".");
@@ -121,9 +106,7 @@ public class Main
                             }
 
                             System.out.println("\nFinding top " + limit + " matches for: " + basePerfume.getName());
-
                             List<Perfume> recommendations = service.getRecommendations(basePerfume, catalog, limit);
-
                             System.out.println("\n--- Top Layering Recommendations ---");
                             for (int i = 0; i < recommendations.size(); i++)
                             {
@@ -136,15 +119,103 @@ public class Main
                         }
                     }
                     break;
-
                 case "4":
+                    System.out.println("\n--- Add a New Perfume ---");
+                    System.out.print("Enter perfume name: ");
+                    String newName = scanner.nextLine();
+                    System.out.print("Enter brand name: ");
+                    String brandName = scanner.nextLine();
+                    System.out.print("Enter volume (ml): ");
+                    int ml = 100;
+                    try
+                    {
+                        ml = Integer.parseInt(scanner.nextLine());
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        System.out.println("Invalid number, defaulting to 100ml.");
+                    }
+                    System.out.print("Enter type (e.g., EDP, BM) or leave blank: ");
+                    String typeInput = scanner.nextLine().toUpperCase();
+                    Type newType = null;
+                    try
+                    {
+                        if (!typeInput.isEmpty())
+                            newType = Type.valueOf(typeInput);
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        System.out.println("Unknown type, setting to null.");
+                    }
+                    int brandId = repository.addBrand(brandName);
+                    if (brandId != -1)
+                    {
+                        int newPerfumeId = repository.addPerfume(newName, brandId, ml, newType);
+                        if (newPerfumeId != -1)
+                        {
+                            System.out.println("Basic details saved! Now let's add the composition.");
+                            while (true)
+                            {
+                                System.out.print("\nEnter a note ingredient (or type 'done' to finish notes): ");
+                                String noteName = scanner.nextLine();
+                                if (noteName.equalsIgnoreCase("done"))
+                                    break;
+                                System.out.print("Enter note layer (TOP, HEART, BASE): ");
+                                String layerStr = scanner.nextLine().toUpperCase();
+                                try
+                                {
+                                    NoteLayer layer = NoteLayer.valueOf(layerStr);
+                                    repository.addNoteToPerfume(newPerfumeId, noteName, layer);
+                                    System.out.println("  -> Added note: " + noteName + " (" + layer + ")");
+                                } catch (IllegalArgumentException e)
+                                {
+                                    System.out.println("  -> Invalid layer. Skipping this note.");
+                                }
+                            }
+                            while (true)
+                            {
+                                System.out.print("\nEnter a season (SPRING, SUMMER, AUTUMN, WINTER) or type 'done': ");
+                                String seasonStr = scanner.nextLine().toUpperCase();
+                                if (seasonStr.equalsIgnoreCase("done"))
+                                    break;
+                                try
+                                {
+                                    Season.valueOf(seasonStr);
+                                    repository.addSeasonToPerfume(newPerfumeId, seasonStr);
+                                    System.out.println("  -> Added season: " + seasonStr);
+                                } catch (IllegalArgumentException e)
+                                {
+                                    System.out.println("  -> Invalid season. Please use SPRING, SUMMER, AUTUMN, or WINTER.");
+                                }
+                            }
+                            System.out.println("\nSuccessfully finished building '" + newName + "'!");
+                        } else
+                            System.out.println("Failed to add perfume to the database.");
+                    }
+                    break;
+                case "5":
+                    System.out.println("\n--- Disable a Perfume ---");
+                    System.out.print("Enter the name of the perfume you want to disable: ");
+                    String disableName = scanner.nextLine();
+                    int idToDisable = repository.getPerfumeIdByName(disableName);
+                    if (idToDisable == -1)
+                        System.out.println("Could not find an active perfume named '" + disableName + "'.");
+                    else
+                    {
+                        boolean success = repository.disablePerfume(idToDisable);
+                        if (success)
+                            System.out.println("Successfully disabled '" + disableName + "'. It will no longer appear in searches.");
+                        else
+                            System.out.println("Failed to disable the perfume.");
+                    }
+                    break;
+                case "0":
                     System.out.println("Cleaning up resources...");
                     if (dbCon != null)
                         dbCon.closeConnection();
                     System.out.println("Exiting application. Goodbye!");
                     running = false;
                     break;
-
                 default:
                     System.out.println("Invalid option. Please try again.");
             }

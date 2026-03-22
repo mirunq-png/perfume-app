@@ -58,7 +58,7 @@ public class PerfumeRepository
 
     public int getPerfumeIdByName(String name)
     {
-        String sql = "SELECT parfum_id FROM prfm_parfumuri WHERE UPPER(nume_parfum) = UPPER(?) AND p.activ=1";
+        String sql = "SELECT parfum_id FROM prfm_parfumuri WHERE UPPER(nume_parfum) = UPPER(?) AND activ=1";
         Connection conn = dbConnection.getConnection();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql))
@@ -226,25 +226,185 @@ public class PerfumeRepository
         return false;
     }
 
-    public boolean addPerfume(int id, String name, int brandId, int ml, Type type)
+    public int addPerfume(String name, int brandId, int ml, Type type)
     {
-        String sql = "INSERT INTO prfm_parfumuri (parfum_id, nume_parfum, brand_id, cantitate_ml, tip_parfum, activ) " +
-                "VALUES (?, ?, ?, ?, ?, 1)";
         Connection conn = dbConnection.getConnection();
-        try (PreparedStatement pstmt = conn.prepareStatement(sql))
+        int newId = 1;
+        String idSql = "SELECT NVL(MAX(parfum_id), 0) + 1 AS next_id FROM prfm_parfumuri";
+        try (PreparedStatement idStmt = conn.prepareStatement(idSql); ResultSet rs = idStmt.executeQuery())
         {
-            pstmt.setInt(1, id);
+            if (rs.next())
+                newId = rs.getInt("next_id");
+        } catch (SQLException e)
+        {
+            System.err.println("Error calculating new perfume ID.");
+            return -1;
+        }
+
+        String insertSql = "INSERT INTO prfm_parfumuri (parfum_id, nume_parfum, brand_id, cantitate_ml, tip_parfum, activ) " + "VALUES (?, ?, ?, ?, ?, 1)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(insertSql))
+        {
+            pstmt.setInt(1, newId);
             pstmt.setString(2, name);
             pstmt.setInt(3, brandId);
             pstmt.setInt(4, ml);
-            pstmt.setString(5, type != null ? type.name() : null); // Convert Enum to String safely
+            pstmt.setString(5, type != null ? type.name() : null);
+
             int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            if (rowsAffected > 0)
+                return newId; // Return the new ID so we know it worked!
         } catch (SQLException e)
         {
             System.err.println("Error adding new perfume: " + name);
             e.printStackTrace();
         }
-        return false;
+        return -1;
+    }
+
+    public int getBrandIdByName(String brandName)
+    {
+        String sql = "SELECT brand_id FROM prfm_branduri WHERE UPPER(nume_brand) = UPPER(?)";
+        Connection conn = dbConnection.getConnection();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
+            pstmt.setString(1, brandName);
+            try (ResultSet rs = pstmt.executeQuery())
+            {
+                if (rs.next())
+                    return rs.getInt("brand_id");
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Error looking up brand: " + brandName);
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    public int addBrand(String brandName)
+    {
+        int existingId = getBrandIdByName(brandName);
+        if (existingId != -1)
+            return existingId;
+        Connection conn = dbConnection.getConnection();
+        int newId = 1;
+        String idSql = "SELECT NVL(MAX(brand_id), 0) + 1 AS next_id FROM prfm_branduri";
+        try (PreparedStatement idStmt = conn.prepareStatement(idSql); ResultSet rs = idStmt.executeQuery())
+        {
+            if (rs.next())
+                newId = rs.getInt("next_id");
+
+        } catch (SQLException e)
+        {
+            System.err.println("Error calculating new brand ID.");
+            e.printStackTrace();
+            return -1;
+        }
+
+        String insertSql = "INSERT INTO prfm_branduri (brand_id, nume_brand) VALUES (?, ?)";
+        try (PreparedStatement insertStmt = conn.prepareStatement(insertSql))
+        {
+            insertStmt.setInt(1, newId);
+            insertStmt.setString(2, brandName);
+
+            int rowsAffected = insertStmt.executeUpdate();
+            if (rowsAffected > 0)
+            {
+                System.out.println("New brand added to database: " + brandName);
+                return newId;
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Error adding brand: " + brandName);
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    public void addNoteToPerfume(int perfumeId, String noteName, NoteLayer layer)
+    {
+        Connection conn = dbConnection.getConnection();
+        int noteId = -1;
+        try
+        {
+            String findSql = "SELECT nota_id FROM prfm_note WHERE UPPER(nume_nota) = UPPER(?)";
+            try (PreparedStatement psFind = conn.prepareStatement(findSql))
+            {
+                psFind.setString(1, noteName);
+                ResultSet rs = psFind.executeQuery();
+                if (rs.next())
+                    noteId = rs.getInt("nota_id");
+                else
+                {
+                    String idSql = "SELECT NVL(MAX(nota_id), 0) + 1 FROM prfm_note";
+                    try (PreparedStatement psId = conn.prepareStatement(idSql); ResultSet rsId = psId.executeQuery())
+                    {
+                        if (rsId.next()) noteId = rsId.getInt(1);
+                    }
+                    String insertNoteSql = "INSERT INTO prfm_note (nota_id, nume_nota) VALUES (?, ?)";
+                    try (PreparedStatement psIns = conn.prepareStatement(insertNoteSql))
+                    {
+                        psIns.setInt(1, noteId);
+                        psIns.setString(2, noteName.toUpperCase());
+                        psIns.executeUpdate();
+                    }
+                }
+            }
+            String linkSql = "INSERT INTO prfm_parfum_note (parfum_id, nota_id, tip_nota) VALUES (?, ?, ?)";
+            try (PreparedStatement psLink = conn.prepareStatement(linkSql))
+            {
+                psLink.setInt(1, perfumeId);
+                psLink.setInt(2, noteId);
+                psLink.setString(3, layer != null ? layer.name() : null);
+                psLink.executeUpdate();
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Error linking note to perfume.");
+            e.printStackTrace();
+        }
+    }
+
+    public void addSeasonToPerfume(int perfumeId, String seasonName)
+    {
+        Connection conn = dbConnection.getConnection();
+        int seasonId = -1;
+        try
+        {
+            String findSql = "SELECT sezon_id FROM prfm_sezoane WHERE UPPER(nume_sezon) = UPPER(?)";
+            try (PreparedStatement psFind = conn.prepareStatement(findSql))
+            {
+                psFind.setString(1, seasonName);
+                ResultSet rs = psFind.executeQuery();
+                if (rs.next())
+                    seasonId = rs.getInt("sezon_id");
+                else
+                {
+                    String idSql = "SELECT NVL(MAX(sezon_id), 0) + 1 FROM prfm_sezoane";
+                    try (PreparedStatement psId = conn.prepareStatement(idSql); ResultSet rsId = psId.executeQuery())
+                    {
+                        if (rsId.next()) seasonId = rsId.getInt(1);
+                    }
+                    String insertSeasonSql = "INSERT INTO prfm_sezoane (sezon_id, nume_sezon) VALUES (?, ?)";
+                    try (PreparedStatement psIns = conn.prepareStatement(insertSeasonSql))
+                    {
+                        psIns.setInt(1, seasonId);
+                        psIns.setString(2, seasonName.toUpperCase());
+                        psIns.executeUpdate();
+                    }
+                }
+            }
+            String linkSql = "INSERT INTO prfm_parfum_sezon (parfum_id, sezon_id) VALUES (?, ?)";
+            try (PreparedStatement psLink = conn.prepareStatement(linkSql))
+            {
+                psLink.setInt(1, perfumeId);
+                psLink.setInt(2, seasonId);
+                psLink.executeUpdate();
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Error linking season to perfume.");
+            e.printStackTrace();
+        }
     }
 }
