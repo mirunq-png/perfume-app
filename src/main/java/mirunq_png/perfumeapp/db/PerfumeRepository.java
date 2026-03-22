@@ -12,7 +12,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PerfumeRepository {
+public class PerfumeRepository
+{
     private final DatabaseConnection dbConnection;
 
     public PerfumeRepository(DatabaseConnection dbConnection) {
@@ -24,7 +25,7 @@ public class PerfumeRepository {
         String sql = "SELECT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum " +
                 "FROM prfm_parfumuri p " +
                 "JOIN prfm_branduri b ON p.brand_id = b.brand_id " +
-                "WHERE p.parfum_id = ?";
+                "WHERE p.parfum_id = ? AND p.activ=1";
 
         Connection conn = dbConnection.getConnection();
 
@@ -57,7 +58,7 @@ public class PerfumeRepository {
 
     public int getPerfumeIdByName(String name)
     {
-        String sql = "SELECT parfum_id FROM prfm_parfumuri WHERE UPPER(nume_parfum) = UPPER(?)";
+        String sql = "SELECT parfum_id FROM prfm_parfumuri WHERE UPPER(nume_parfum) = UPPER(?) AND p.activ=1";
         Connection conn = dbConnection.getConnection();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql))
@@ -82,7 +83,7 @@ public class PerfumeRepository {
 
         String sql = "SELECT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum " +
                 "FROM prfm_parfumuri p, prfm_branduri b " +
-                "WHERE p.brand_id = b.brand_id";
+                "WHERE p.brand_id = b.brand_id AND p.activ=1";
 
         Connection conn = dbConnection.getConnection();
 
@@ -116,7 +117,8 @@ public class PerfumeRepository {
                 "WHERE p.brand_id = b.brand_id " +
                 "  AND p.parfum_id = pn.parfum_id " +
                 "  AND pn.nota_id = n.nota_id " +
-                "  AND UPPER(n.nume_nota) LIKE UPPER(?)";
+                "  AND UPPER(n.nume_nota) LIKE UPPER(?)" +
+                "AND p.activ=1";
 
         Connection conn = dbConnection.getConnection();
 
@@ -170,7 +172,8 @@ public class PerfumeRepository {
         }
     }
 
-    private void loadSeasons(Perfume perfume, int perfumeId) {
+    private void loadSeasons(Perfume perfume, int perfumeId)
+    {
         String sql = "SELECT s.nume_sezon " +
                 "FROM prfm_parfum_sezon ps, prfm_sezoane s " +
                 "WHERE ps.sezon_id = s.sezon_id " +
@@ -178,23 +181,70 @@ public class PerfumeRepository {
 
         Connection conn = dbConnection.getConnection();
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
             pstmt.setInt(1, perfumeId);
-            try (ResultSet rs = pstmt.executeQuery()) {
+            try (ResultSet rs = pstmt.executeQuery())
+            {
                 while (rs.next()) {
                     String seasonStr = rs.getString("nume_sezon");
-                    if (seasonStr != null) {
-                        try {
+                    if (seasonStr != null)
+                    {
+                        try
+                        {
                             perfume.addSeason(Season.valueOf(seasonStr.toUpperCase()));
-                        } catch (IllegalArgumentException e) {
+                        } catch (IllegalArgumentException e)
+                        {
                             System.err.println("Unknown season in DB: " + seasonStr);
                         }
                     }
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             System.err.println("Error loading seasons for perfume ID " + perfumeId);
             e.printStackTrace();
         }
+    }
+    public boolean disablePerfume(int perfumeId)
+    {
+        String sql = "UPDATE prfm_parfumuri SET activ = 0 WHERE parfum_id = ?";
+        Connection conn = dbConnection.getConnection();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
+            pstmt.setInt(1, perfumeId);
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e)
+        {
+            System.err.println("Error disabling perfume ID " + perfumeId);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean addPerfume(int id, String name, int brandId, int ml, Type type)
+    {
+        String sql = "INSERT INTO prfm_parfumuri (parfum_id, nume_parfum, brand_id, cantitate_ml, tip_parfum, activ) " +
+                "VALUES (?, ?, ?, ?, ?, 1)";
+        Connection conn = dbConnection.getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, name);
+            pstmt.setInt(3, brandId);
+            pstmt.setInt(4, ml);
+            pstmt.setString(5, type != null ? type.name() : null); // Convert Enum to String safely
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e)
+        {
+            System.err.println("Error adding new perfume: " + name);
+            e.printStackTrace();
+        }
+        return false;
     }
 }
