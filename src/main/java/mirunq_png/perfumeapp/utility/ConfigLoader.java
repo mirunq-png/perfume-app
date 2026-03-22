@@ -3,18 +3,20 @@ package mirunq_png.perfumeapp.utility;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class ConfigLoader {
+public class ConfigLoader
+{
     private static final Properties properties = new Properties();
 
-    static {
-        try (InputStream input = ConfigLoader.class.getClassLoader()
-                .getResourceAsStream("config.properties")) {
-            if (input == null) {
+    static
+    {
+        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream("config.properties"))
+        {
+            if (input == null)
                 System.out.println("Sorry, unable to find config.properties");
-            } else {
+            else
                 properties.load(input);
-            }
-        } catch (Exception ex) {
+        } catch (Exception ex)
+        {
             ex.printStackTrace();
         }
     }

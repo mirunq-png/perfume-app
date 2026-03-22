@@ -42,7 +42,8 @@ public class Perfume
         this.type=type;
     }
 
-    public Perfume(String brand, String name, int ml, List<Note> notes, Set<Season> seasons, Type type) {
+    public Perfume(String brand, String name, int ml, List<Note> notes, Set<Season> seasons, Type type)
+    {
         if(brand!=null&&!brand.isEmpty())
             this.brand = brand;
         else
@@ -106,7 +107,8 @@ public class Perfume
      * - Type compatibility (25%): BM+EDP best, EDP+EDP mid, BM+BM worst
      * - Season overlap (15%): Same seasons preferred
      */
-    public double calculateLayeringScore(Perfume candidate) {
+    public double calculateLayeringScore(Perfume candidate)
+    {
         double pyramidScore = calculatePyramidComplementarity(candidate);
         double sharedNotesScore = calculateSharedNotes(candidate);
         double typeCompatibilityScore = calculateTypeCompatibility(candidate);
@@ -123,7 +125,8 @@ public class Perfume
      * Okay: This has BASE, Candidate has MIDDLE
      * Poor: Both BASE-heavy (conflicting)
      */
-    public double calculatePyramidComplementarity(Perfume candidate) {
+    public double calculatePyramidComplementarity(Perfume candidate)
+    {
         long thisBaseCount = notes.stream()
                 .filter(n -> n.getLayer() == NoteLayer.BASE)
                 .count();
@@ -177,7 +180,8 @@ public class Perfume
      * Shared Notes Score (0.0 - 1.0)
      * How many notes do these perfumes have in common?
      */
-    public double calculateSharedNotes(Perfume candidate) {
+    public double calculateSharedNotes(Perfume candidate)
+    {
         if (this.notes.isEmpty() || candidate.notes.isEmpty()) {
             return 0.0;
         }
@@ -199,27 +203,19 @@ public class Perfume
      * Mid: EDP + EDP (0.6) - same concentration
      * Worst: BM + BM (0.2) - both light, don't layer well
      */
-    public double calculateTypeCompatibility(Perfume candidate) {
-        if (this.type == null || candidate.type == null) {
+    public double calculateTypeCompatibility(Perfume candidate)
+    {
+        if (this.type == null || candidate.type == null)
             return 0.5; // Neutral if type unknown
-        }
-
         // Best: One is BM, other is EDP
-        if ((this.type.equals(Type.BM) && candidate.type.equals(Type.EDP)) ||
-                (this.type.equals(Type.EDP) && candidate.type.equals(Type.BM))) {
+        if ((this.type.equals(Type.BM) && candidate.type.equals(Type.EDP)) || (this.type.equals(Type.EDP) && candidate.type.equals(Type.BM)))
             return 1.0;
-        }
-
         // Mid: Both EDP
-        if (this.type.equals(Type.EDP) && candidate.type.equals(Type.EDP)) {
+        if (this.type.equals(Type.EDP) && candidate.type.equals(Type.EDP))
             return 0.6;
-        }
-
         // Worst: Both BM
-        if (this.type.equals(Type.BM) && candidate.type.equals(Type.BM)) {
+        if (this.type.equals(Type.BM) && candidate.type.equals(Type.BM))
             return 0.2;
-        }
-
         return 0.5; // Fallback
     }
 
@@ -227,15 +223,11 @@ public class Perfume
      * Season Overlap Score (0.0 - 1.0)
      * If both perfumes are suitable for same seasons, higher score
      */
-    public double calculateSeasonOverlap(Perfume candidate) {
-        if (this.seasons.isEmpty() || candidate.seasons.isEmpty()) {
+    public double calculateSeasonOverlap(Perfume candidate)
+    {
+        if (this.seasons.isEmpty() || candidate.seasons.isEmpty())
             return 0.5; // Neutral if season data missing
-        }
-
-        long sharedSeasons = this.seasons.stream()
-                .filter(candidate.seasons::contains)
-                .count();
-
+        long sharedSeasons = this.seasons.stream().filter(candidate.seasons::contains).count();
         double maxSeasons = Math.max(this.seasons.size(), candidate.seasons.size());
         return sharedSeasons / maxSeasons;
     }
@@ -243,28 +235,33 @@ public class Perfume
     /**
      * Get the dominant layer of this perfume
      */
-    public NoteLayer getDominantLayer() {
+    public NoteLayer getDominantLayer()
+    {
         long topCount = notes.stream().filter(n -> n.getLayer() == NoteLayer.TOP).count();
         long midCount = notes.stream().filter(n -> n.getLayer() == NoteLayer.HEART).count();
         long baseCount = notes.stream().filter(n -> n.getLayer() == NoteLayer.BASE).count();
 
-        if (baseCount >= topCount && baseCount >= midCount) return NoteLayer.BASE;
-        if (topCount >= midCount) return NoteLayer.TOP;
+        if (baseCount >= topCount && baseCount >= midCount)
+            return NoteLayer.BASE;
+        if (topCount >= midCount)
+            return NoteLayer.TOP;
         return NoteLayer.HEART;
     }
 
     /**
      * Human-readable explanation of why this is a good layer
      */
-    public String getLayeringExplanation(Perfume candidate) {
+    public String getLayeringExplanation(Perfume candidate)
+    {
         NoteLayer thisDominant = this.getDominantLayer();
         NoteLayer candidateDominant = candidate.getDominantLayer();
 
-        if (thisDominant == NoteLayer.BASE && candidateDominant == NoteLayer.TOP) {
+        if (thisDominant == NoteLayer.BASE && candidateDominant == NoteLayer.TOP)
             return "Perfect: " + this.name + " (BASE) + " + candidate.name + " (TOP)";
-        } else if (thisDominant == NoteLayer.BASE && candidateDominant == NoteLayer.HEART) {
+        else if (thisDominant == NoteLayer.BASE && candidateDominant == NoteLayer.HEART)
             return "Good: " + this.name + " (BASE) + " + candidate.name + " (HEART)";
-        } else {
+        else
+        {
             long shared = countSharedNotes(candidate);
             return "Compatible: " + shared + " shared notes";
         }
@@ -273,12 +270,8 @@ public class Perfume
     /**
      * Helper: Count shared notes between two perfumes
      */
-    private long countSharedNotes(Perfume candidate) {
-        return this.notes.stream()
-                .map(n -> n.getName().toUpperCase())
-                .filter(noteName -> candidate.notes.stream()
-                        .map(n -> n.getName().toUpperCase())
-                        .anyMatch(otherNote -> otherNote.equals(noteName)))
-                .count();
+    private long countSharedNotes(Perfume candidate)
+    {
+        return this.notes.stream().map(n -> n.getName().toUpperCase()).filter(noteName -> candidate.notes.stream().map(n -> n.getName().toUpperCase()).anyMatch(otherNote -> otherNote.equals(noteName))).count();
     }
 }
