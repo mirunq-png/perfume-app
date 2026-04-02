@@ -22,7 +22,7 @@ public class PerfumeRepository
 
     public Perfume getPerfumeById(int id)
     {
-        String sql = "SELECT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum " +
+        String sql = "SELECT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum, p.rating " +
                 "FROM prfm_parfumuri p " +
                 "JOIN prfm_branduri b ON p.brand_id = b.brand_id " +
                 "WHERE p.parfum_id = ? AND p.activ=1";
@@ -41,7 +41,9 @@ public class PerfumeRepository
                     Type type = (typeStr != null) ? Type.valueOf(typeStr.toUpperCase()) : null;
 
                     Perfume perfume = new Perfume(rs.getString("nume_brand"), rs.getString("nume_parfum"), rs.getInt("cantitate_ml"), type);
-
+                    float rating = rs.getFloat("rating");
+                    if (!rs.wasNull()) // safety for null column
+                        perfume.addRating(rating);
                     loadNotes(perfume, id);
                     loadSeasons(perfume, id);
 
@@ -53,6 +55,7 @@ public class PerfumeRepository
             System.err.println("Error fetching perfume ID " + id);
             e.printStackTrace();
         }
+
         return null;
     }
 
@@ -81,7 +84,7 @@ public class PerfumeRepository
     {
         List<Perfume> allPerfumes = new ArrayList<>();
 
-        String sql = "SELECT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum " +
+        String sql = "SELECT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum, p.rating " +
                 "FROM prfm_parfumuri p, prfm_branduri b " +
                 "WHERE p.brand_id = b.brand_id AND p.activ=1";
 
@@ -96,6 +99,9 @@ public class PerfumeRepository
                 Type type = (typeStr != null) ? Type.valueOf(typeStr.toUpperCase()) : null;
 
                 Perfume perfume = new Perfume(rs.getString("nume_brand"), rs.getString("nume_parfum"), rs.getInt("cantitate_ml"), type);
+                float rating = rs.getFloat("rating");
+                if (!rs.wasNull()) // safety for null column
+                    perfume.addRating(rating);
                 loadNotes(perfume, id);
                 loadSeasons(perfume, id);
                 allPerfumes.add(perfume);
@@ -112,7 +118,7 @@ public class PerfumeRepository
     {
         List<Perfume> matchingPerfumes = new ArrayList<>();
 
-        String sql = "SELECT DISTINCT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum " +
+        String sql = "SELECT DISTINCT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum, p.rating " +
                 "FROM prfm_parfumuri p, prfm_branduri b, prfm_parfum_note pn, prfm_note n " +
                 "WHERE p.brand_id = b.brand_id " +
                 "  AND p.parfum_id = pn.parfum_id " +
@@ -133,7 +139,9 @@ public class PerfumeRepository
                     String typeStr = rs.getString("tip_parfum");
                     Type type = (typeStr != null) ? Type.valueOf(typeStr.toUpperCase()) : null;
                     Perfume perfume = new Perfume(rs.getString("nume_brand"), rs.getString("nume_parfum"), rs.getInt("cantitate_ml"), type);
-
+                    float rating = rs.getFloat("rating");
+                    if (!rs.wasNull()) // safety for null column
+                        perfume.addRating(rating);
                     loadNotes(perfume, id);
                     loadSeasons(perfume, id);
                     matchingPerfumes.add(perfume);
@@ -404,6 +412,21 @@ public class PerfumeRepository
         } catch (SQLException e)
         {
             System.err.println("Error linking season to perfume.");
+            e.printStackTrace();
+        }
+    }
+    public void addRatingToPerfume(int perfumeId, float r)
+    {
+        String sql = "UPDATE prfm_parfumuri SET rating = ? WHERE parfum_id = ? AND activ = 1";
+        Connection conn = dbConnection.getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
+            pstmt.setFloat(1, r);
+            pstmt.setInt(2, perfumeId);
+            pstmt.executeUpdate();
+        } catch (SQLException e)
+        {
+            System.err.println("Error setting rating for perfume ID " + perfumeId);
             e.printStackTrace();
         }
     }

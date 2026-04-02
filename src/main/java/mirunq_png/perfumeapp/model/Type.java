@@ -1,5 +1,5 @@
 package mirunq_png.perfumeapp.model;
 
 public enum Type {
-    BM, EDP;
+    BM, EDP, EDT;
 }

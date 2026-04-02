@@ -5,23 +5,29 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DatabaseConnection {
+public class DatabaseConnection
+{
     private static DatabaseConnection instance;
     private final Connection connection;
 
-    private DatabaseConnection() throws SQLException {
+    private DatabaseConnection() throws SQLException, ClassNotFoundException
+    {
+        Class.forName("oracle.jdbc.driver.OracleDriver"); // safety measure for tincat
         String url = ConfigLoader.getProperty("db.url");
         String user = ConfigLoader.getProperty("db.user");
         String pass = ConfigLoader.getProperty("db.password");
-        try {
+        try
+        {
             Class.forName("oracle.jdbc.driver.OracleDriver");
             this.connection = DriverManager.getConnection(url, user, pass);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e)
+        {
             throw new SQLException("Oracle connection could not be established. Did you set up the config correctly?", e);
         }
     }
 
-    public static DatabaseConnection getInstance() throws SQLException {
+    public static DatabaseConnection getInstance() throws SQLException, ClassNotFoundException
+    {
         if (instance == null)
             instance = new DatabaseConnection();
         else if (instance.getConnection() == null || instance.getConnection().isClosed())
@@ -32,7 +38,8 @@ public class DatabaseConnection {
     public Connection getConnection() {
         return connection;
     }
-    public void closeConnection() {
+    public void closeConnection()
+    {
         try
         {
             if (connection != null && !connection.isClosed())

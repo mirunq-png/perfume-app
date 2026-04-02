@@ -14,8 +14,8 @@ public class Main
     {
         System.out.println("--- Perfume Application Initializing ---");
         DatabaseConnection dbCon = null;
-        try {
-            // Checklist: Initialize DatabaseConnection
+        try
+        {
             dbCon = DatabaseConnection.getInstance();
             if (dbCon.getConnection() != null && !dbCon.getConnection().isClosed())
                 System.out.println("Successfully connected to database!");
@@ -23,6 +23,9 @@ public class Main
         {
             System.err.println("Database connection failed. Exiting...");
             e.printStackTrace();
+        } catch (ClassNotFoundException e)
+        {
+            throw new RuntimeException(e);
         }
 
         PerfumeRepository repository = new PerfumeRepository(dbCon);
@@ -45,15 +48,14 @@ public class Main
                 case "1":
                     System.out.println("\n--- All Perfumes ---");
                     List<Perfume> allPerfumes = repository.getAllPerfumes();
-                    if (allPerfumes.isEmpty()) {
+                    if (allPerfumes.isEmpty())
                         System.out.println("No perfumes found in the database.");
-                    } else {
+                    else
                         for (Perfume p : allPerfumes)
                         {
                             System.out.println(p);
                             System.out.println("-".repeat(40));
                         }
-                    }
                     break;
                 case "2":
                     System.out.print("\nEnter note to search (e.g., VANILLA, MUSK): ");
@@ -186,6 +188,22 @@ public class Main
                                 } catch (IllegalArgumentException e)
                                 {
                                     System.out.println("  -> Invalid season. Please use SPRING, SUMMER, AUTUMN, or WINTER.");
+                                }
+                            }
+                            System.out.print("\nEnter a rating (0.0 - 10.0) or press Enter to skip: ");
+                            String ratingInput = scanner.nextLine();
+                            if (!ratingInput.isBlank())
+                            {
+                                try
+                                {
+                                    float rating = Float.parseFloat(ratingInput);
+                                    if (rating >= 0 && rating <= 10)
+                                        repository.addRatingToPerfume(newPerfumeId, rating);
+                                    else
+                                        System.out.println("Rating out of range (0-10), skipping.");
+                                } catch (NumberFormatException e)
+                                {
+                                    System.out.println("Invalid number, skipping rating.");
                                 }
                             }
                             System.out.println("\nSuccessfully finished building '" + newName + "'!");

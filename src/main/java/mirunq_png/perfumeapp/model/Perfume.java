@@ -1,5 +1,6 @@
 package mirunq_png.perfumeapp.model;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ public class Perfume
     private List<Note> notes;
     private final Set<Season> seasons;
     private Type type;
+    private float rating; // [!!!]
 
     public Perfume()
     {
@@ -66,15 +68,17 @@ public class Perfume
             this.seasons=new HashSet<>();
         this.type=type;
     }
-    //add
+    //add/set
     public void addNote(Note note) {notes.add(note);}
     public void addSeason(Season sz) {seasons.add(sz);}
+    public void addRating(float r) {if (r>=0&&r<=10) rating=r; else rating=10;;}
     //get
     public String getName() { return name; }
     public String getBrand() { return brand; }
-    public int getMl() {return ml;}
+//    public int getMl() {return ml;}
     public List<Note> getNotes() { return notes; }
-    public Set<Season> getSeasons() {return seasons;}
+//    public Set<Season> getSeasons() {return seasons;}
+    public float getRating() { return rating; }
 
     @Override
     public String toString()
@@ -96,16 +100,21 @@ public class Perfume
         else
             for (Season sz : seasons)
                 sb.append("  • ").append(sz).append("\n");
+        if (rating>0)
+              sb.append("Rating: ").append(String.format("%.1f",rating)).append("/10\n");
+        else
+            sb.append("Rating: n/a\n");
         return sb.toString();
     }
 
     /**
      * Calculate overall layering score with another perfume (0.0 - 1.0)
      * Factors:
-     * - Pyramid complementarity (35%): Base layer heavy on BASE → Top layer heavy on TOP
-     * - Shared notes (25%): Common notes between both
-     * - Type compatibility (25%): BM+EDP best, EDP+EDP mid, BM+BM worst
+     * - Pyramid complementarity (20%): Base layer heavy on BASE → Top layer heavy on TOP
+     * - Shared notes (35%): Common notes between both
+     * - Type compatibility (20%): BM+EDP best, EDP+EDP mid, BM+BM worst
      * - Season overlap (15%): Same seasons preferred
+     * - Rating (10%): User preference is taken into consideration
      */
     public double calculateLayeringScore(Perfume candidate)
     {
@@ -113,10 +122,9 @@ public class Perfume
         double sharedNotesScore = calculateSharedNotes(candidate);
         double typeCompatibilityScore = calculateTypeCompatibility(candidate);
         double seasonScore = calculateSeasonOverlap(candidate);
-
-        return (pyramidScore * 0.35) + (sharedNotesScore * 0.25) + (typeCompatibilityScore * 0.25) + (seasonScore * 0.15);
+        double ratingScore = calculateRatingScore(candidate);
+        return (pyramidScore * 0.2) + (sharedNotesScore * 0.35) + (typeCompatibilityScore * 0.2) + (seasonScore * 0.15) + (ratingScore*0.1);
     }
-
     /**
      * Pyramid Complementarity (0.0 - 1.0)
      * Perfect: This BASE-heavy, Candidate TOP-heavy
@@ -239,6 +247,15 @@ public class Perfume
             explanation.append("Incredible bond (").append(shared).append(" shared notes). ");
         else if (shared == 1)
             explanation.append("Anchored by 1 shared note. ");
+
+        float avgRating = (this.rating + candidate.rating) / 2.0f;
+        if (avgRating >= 8.0f)
+            explanation.append("Both highly rated (avg ").append(String.format("%.1f", avgRating)).append("). ");
+        else if (this.rating >= 8.0f)
+            explanation.append(this.name).append(" is highly rated. ");
+        else if (candidate.rating >= 8.0f)
+            explanation.append(candidate.getName()).append(" is highly rated. ");
+
         // If it somehow scored well but didn't trigger the above texts, give a nice default
         if (explanation.length() == 0)
             return "Compatible based on season and overall profile.";
@@ -251,5 +268,11 @@ public class Perfume
     private long countSharedNotes(Perfume candidate)
     {
         return this.notes.stream().map(n -> n.getName().toUpperCase()).filter(noteName -> candidate.notes.stream().map(n -> n.getName().toUpperCase()).anyMatch(otherNote -> otherNote.equals(noteName))).count();
+    }
+
+    public double calculateRatingScore(Perfume candidate)
+    {
+        float avg = (this.rating + candidate.rating) / 2.0f;
+        return avg / 10.0;
     }
 }
