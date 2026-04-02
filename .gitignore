@@ -38,3 +38,9 @@ gen/
 src/main/resources/config.properties
 src/main/resources/db.sql
 src/main/resources/inserts.sql
+
+# Others
+.smarttomcat
+target
+perfume-app.iml
+.idea
