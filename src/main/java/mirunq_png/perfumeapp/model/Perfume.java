@@ -58,6 +58,7 @@ public class Perfume
             this.ml = ml;
         else
             this.ml=0;
+
         if (notes!=null)
             this.notes=new ArrayList<>(notes);
         else

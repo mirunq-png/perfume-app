@@ -33,23 +33,11 @@ public class PerfumeRepository
         {
             pstmt.setInt(1, id);
 
-            try (ResultSet rs = pstmt.executeQuery())
-            {
+            ResultSet rs = pstmt.executeQuery();
                 if (rs.next())
                 {
-                    String typeStr = rs.getString("tip_parfum");
-                    Type type = (typeStr != null) ? Type.valueOf(typeStr.toUpperCase()) : null;
-
-                    Perfume perfume = new Perfume(rs.getString("nume_brand"), rs.getString("nume_parfum"), rs.getInt("cantitate_ml"), type);
-                    float rating = rs.getFloat("rating");
-                    if (!rs.wasNull()) // safety for null column
-                        perfume.addRating(rating);
-                    loadNotes(perfume, id);
-                    loadSeasons(perfume, id);
-
-                    return perfume;
+                    return convertSqlToPerfume(rs);
                 }
-            }
         } catch (SQLException e)
         {
             System.err.println("Error fetching perfume ID " + id);
@@ -94,17 +82,7 @@ public class PerfumeRepository
         {
             while (rs.next())
             {
-                int id = rs.getInt("parfum_id");
-                String typeStr = rs.getString("tip_parfum");
-                Type type = (typeStr != null) ? Type.valueOf(typeStr.toUpperCase()) : null;
-
-                Perfume perfume = new Perfume(rs.getString("nume_brand"), rs.getString("nume_parfum"), rs.getInt("cantitate_ml"), type);
-                float rating = rs.getFloat("rating");
-                if (!rs.wasNull()) // safety for null column
-                    perfume.addRating(rating);
-                loadNotes(perfume, id);
-                loadSeasons(perfume, id);
-                allPerfumes.add(perfume);
+                allPerfumes.add(convertSqlToPerfume(rs));
             }
         } catch (SQLException e)
         {
@@ -135,16 +113,8 @@ public class PerfumeRepository
             {
                 while (rs.next())
                 {
-                    int id = rs.getInt("parfum_id");
-                    String typeStr = rs.getString("tip_parfum");
-                    Type type = (typeStr != null) ? Type.valueOf(typeStr.toUpperCase()) : null;
-                    Perfume perfume = new Perfume(rs.getString("nume_brand"), rs.getString("nume_parfum"), rs.getInt("cantitate_ml"), type);
-                    float rating = rs.getFloat("rating");
-                    if (!rs.wasNull()) // safety for null column
-                        perfume.addRating(rating);
-                    loadNotes(perfume, id);
-                    loadSeasons(perfume, id);
-                    matchingPerfumes.add(perfume);
+                    // TODO: make a generic function that converts rs into Perfume -> DONE
+                    matchingPerfumes.add(convertSqlToPerfume(rs));
                 }
             }
         } catch (SQLException e)
@@ -201,6 +171,7 @@ public class PerfumeRepository
                         try
                         {
                             perfume.addSeason(Season.valueOf(seasonStr.toUpperCase()));
+                            // INSERT ... ON CONFLICT DO NO NOTHING/UPDATE
                         } catch (IllegalArgumentException e)
                         {
                             System.err.println("Unknown season in DB: " + seasonStr);
@@ -261,7 +232,7 @@ public class PerfumeRepository
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0)
-                return newId; // Return the new ID so we know it worked!
+                return newId;
         } catch (SQLException e)
         {
             System.err.println("Error adding new perfume: " + name);
@@ -429,5 +400,27 @@ public class PerfumeRepository
             System.err.println("Error setting rating for perfume ID " + perfumeId);
             e.printStackTrace();
         }
+    }
+    private Perfume convertSqlToPerfume(ResultSet rs) throws SQLException
+    {
+        int id=rs.getInt("parfum_id");
+        String typeSql = rs.getString("tip_parfum");
+        Type type;
+        if (typeSql!=null) // to avoid NullPointerException in valueOf
+            type=Type.valueOf(typeSql.toUpperCase());
+        else type=null;
+        Perfume p=new Perfume(
+                rs.getString("nume_brand"),
+                rs.getString("nume_parfum"),
+                rs.getInt("cantitate_ml"),
+                type
+        );
+        float rating=rs.getFloat("rating");
+        if (!rs.wasNull()) // despite rating having a default value in the db, safety for null
+            p.addRating(rating);
+        loadNotes(p,id);
+        loadSeasons(p,id);
+
+        return p;
     }
 }

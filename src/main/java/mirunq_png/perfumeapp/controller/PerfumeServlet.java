@@ -40,23 +40,25 @@ public class PerfumeServlet extends HttpServlet
         try
         {
             int id = repo.getPerfumeIdByName(inputName);
-            if (id != -1)
+            if (id == -1)
             {
-                Perfume basePerfume = repo.getPerfumeById(id);
-                if (basePerfume == null)
-                {
-                    response.getWriter().println("Found ID " + id + " but failed to load perfume object.");
-                    return;
-                }
-                List<Perfume> allPerfumes = repo.getAllPerfumes();
-                List<Perfume> results = service.getRecommendations(basePerfume, allPerfumes, 5);
-
-                request.setAttribute("base", basePerfume);
-                request.setAttribute("results", results);
-                request.getRequestDispatcher("results.jsp").forward(request, response);
-            }
-            else
                 response.getWriter().println("Perfume '" + inputName + "' not found.");
+                return;
+            }
+
+            Perfume basePerfume = repo.getPerfumeById(id);
+            if (basePerfume == null)
+            {
+                response.getWriter().println("Found ID " + id + " but failed to load perfume object.");
+                return;
+            }
+
+            List<Perfume> allPerfumes = repo.getAllPerfumes();
+            List<Perfume> results = service.getRecommendations(basePerfume, allPerfumes, 5);
+
+            request.setAttribute("base", basePerfume);
+            request.setAttribute("results", results);
+            request.getRequestDispatcher("results.jsp").forward(request, response);
         }
         catch (Exception e)
         {
