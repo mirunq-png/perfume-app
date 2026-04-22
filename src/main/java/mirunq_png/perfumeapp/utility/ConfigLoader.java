@@ -12,7 +12,7 @@ public class ConfigLoader
         try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream("config.properties"))
         {
             if (input == null)
-                System.out.println("Sorry, unable to find config.properties");
+                System.err.println("Unable to find config.properties");
             else
                 properties.load(input);
         } catch (Exception ex)

@@ -112,10 +112,7 @@ public class PerfumeRepository
             try (ResultSet rs = pstmt.executeQuery())
             {
                 while (rs.next())
-                {
-                    // TODO: make a generic function that converts rs into Perfume -> DONE
                     matchingPerfumes.add(convertSqlToPerfume(rs));
-                }
             }
         } catch (SQLException e)
         {
@@ -150,7 +147,7 @@ public class PerfumeRepository
         }
     }
 
-    private void loadSeasons(Perfume perfume, int perfumeId)
+    private void loadSeasons(Perfume perfume, int perfumeId) // to be changed
     {
         String sql = "SELECT s.nume_sezon " +
                 "FROM prfm_parfum_sezon ps, prfm_sezoane s " +
@@ -164,14 +161,15 @@ public class PerfumeRepository
             pstmt.setInt(1, perfumeId);
             try (ResultSet rs = pstmt.executeQuery())
             {
-                while (rs.next()) {
+                while (rs.next())
+                {
                     String seasonStr = rs.getString("nume_sezon");
                     if (seasonStr != null)
                     {
                         try
                         {
                             perfume.addSeason(Season.valueOf(seasonStr.toUpperCase()));
-                            // INSERT ... ON CONFLICT DO NO NOTHING/UPDATE
+
                         } catch (IllegalArgumentException e)
                         {
                             System.err.println("Unknown season in DB: " + seasonStr);
@@ -261,7 +259,7 @@ public class PerfumeRepository
         }
         return -1;
     }
-    public int addBrand(String brandName)
+    public int addBrand(String brandName) // to be changed
     {
         int existingId = getBrandIdByName(brandName);
         if (existingId != -1)
@@ -300,7 +298,7 @@ public class PerfumeRepository
         }
         return -1;
     }
-    public void addNoteToPerfume(int perfumeId, String noteName, NoteLayer layer)
+    public void addNoteToPerfume(int perfumeId, String noteName, NoteLayer layer) // to be changed
     {
         Connection conn = dbConnection.getConnection();
         int noteId = -1;
@@ -346,6 +344,7 @@ public class PerfumeRepository
 
     public void addSeasonToPerfume(int perfumeId, String seasonName)
     {
+        // to be added later in postgresql: INSERT ... ON CONFLICT DO NO NOTHING/UPDATE
         Connection conn = dbConnection.getConnection();
         int seasonId = -1;
         try
