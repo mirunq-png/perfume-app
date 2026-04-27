@@ -25,7 +25,7 @@ public class PerfumeRepository
         String sql = "SELECT p.parfum_id, p.nume_parfum, b.nume_brand, p.cantitate_ml, p.tip_parfum, p.rating " +
                 "FROM prfm_parfumuri p " +
                 "JOIN prfm_branduri b ON p.brand_id = b.brand_id " +
-                "WHERE p.parfum_id = ? AND p.activ=1";
+                "WHERE p.parfum_id = ? AND p.activ=1"; // avoiding a subquery
 
         Connection conn = dbConnection.getConnection();
 
@@ -33,11 +33,11 @@ public class PerfumeRepository
         {
             pstmt.setInt(1, id);
 
-            ResultSet rs = pstmt.executeQuery();
+            try (ResultSet rs = pstmt.executeQuery())
+            {
                 if (rs.next())
-                {
                     return convertSqlToPerfume(rs);
-                }
+            }
         } catch (SQLException e)
         {
             System.err.println("Error fetching perfume ID " + id);
@@ -81,9 +81,7 @@ public class PerfumeRepository
         try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery())
         {
             while (rs.next())
-            {
                 allPerfumes.add(convertSqlToPerfume(rs));
-            }
         } catch (SQLException e)
         {
             System.err.println("Error fetching the perfume catalog.");
@@ -131,23 +129,27 @@ public class PerfumeRepository
 
         Connection conn = dbConnection.getConnection();
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
             pstmt.setInt(1, perfumeId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
+            try (ResultSet rs = pstmt.executeQuery())
+            {
+                while (rs.next())
+                {
                     String noteName = rs.getString("nume_nota");
                     String layerStr = rs.getString("tip_nota");
                     NoteLayer layer = (layerStr != null) ? NoteLayer.valueOf(layerStr.toUpperCase()) : null;
                     perfume.addNote(new Note(noteName, layer));
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             System.err.println("Error loading notes for perfume ID " + perfumeId);
             e.printStackTrace();
         }
     }
 
-    private void loadSeasons(Perfume perfume, int perfumeId) // to be changed
+    private void loadSeasons(Perfume perfume, int perfumeId)
     {
         String sql = "SELECT s.nume_sezon " +
                 "FROM prfm_parfum_sezon ps, prfm_sezoane s " +
@@ -164,16 +166,14 @@ public class PerfumeRepository
                 while (rs.next())
                 {
                     String seasonStr = rs.getString("nume_sezon");
-                    if (seasonStr != null)
+                    if (seasonStr==null)
+                        continue; // skips everything down below and runs back to the top of the while
+                    try
                     {
-                        try
-                        {
-                            perfume.addSeason(Season.valueOf(seasonStr.toUpperCase()));
-
-                        } catch (IllegalArgumentException e)
-                        {
-                            System.err.println("Unknown season in DB: " + seasonStr);
-                        }
+                        perfume.addSeason(Season.valueOf(seasonStr.toUpperCase()));
+                    } catch (IllegalArgumentException e)
+                    {
+                        System.err.println("Unknown season in DB: " + seasonStr);
                     }
                 }
             }
@@ -206,18 +206,7 @@ public class PerfumeRepository
     public int addPerfume(String name, int brandId, int ml, Type type)
     {
         Connection conn = dbConnection.getConnection();
-        int newId = 1;
-        String idSql = "SELECT NVL(MAX(parfum_id), 0) + 1 AS next_id FROM prfm_parfumuri";
-        try (PreparedStatement idStmt = conn.prepareStatement(idSql); ResultSet rs = idStmt.executeQuery())
-        {
-            if (rs.next())
-                newId = rs.getInt("next_id");
-        } catch (SQLException e)
-        {
-            System.err.println("Error calculating new perfume ID.");
-            return -1;
-        }
-
+        int newId=getNextId("prfm_parfumuri","parfum_id");
         String insertSql = "INSERT INTO prfm_parfumuri (parfum_id, nume_parfum, brand_id, cantitate_ml, tip_parfum, activ) " + "VALUES (?, ?, ?, ?, ?, 1)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(insertSql))
@@ -229,7 +218,7 @@ public class PerfumeRepository
             pstmt.setString(5, type != null ? type.name() : null);
 
             int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected > 0)
+            if (rowsAffected > 0) // if successful
                 return newId;
         } catch (SQLException e)
         {
@@ -259,26 +248,16 @@ public class PerfumeRepository
         }
         return -1;
     }
-    public int addBrand(String brandName) // to be changed
+    public int addBrand(String brandName)
     {
         int existingId = getBrandIdByName(brandName);
         if (existingId != -1)
             return existingId;
         Connection conn = dbConnection.getConnection();
         int newId = 1;
-        String idSql = "SELECT NVL(MAX(brand_id), 0) + 1 AS next_id FROM prfm_branduri";
-        try (PreparedStatement idStmt = conn.prepareStatement(idSql); ResultSet rs = idStmt.executeQuery())
-        {
-            if (rs.next())
-                newId = rs.getInt("next_id");
-
-        } catch (SQLException e)
-        {
-            System.err.println("Error calculating new brand ID.");
-            e.printStackTrace();
+        newId=getNextId("prfm_branduri","brand_id");
+        if (newId==-1)
             return -1;
-        }
-
         String insertSql = "INSERT INTO prfm_branduri (brand_id, nume_brand) VALUES (?, ?)";
         try (PreparedStatement insertStmt = conn.prepareStatement(insertSql))
         {
@@ -286,102 +265,70 @@ public class PerfumeRepository
             insertStmt.setString(2, brandName);
 
             int rowsAffected = insertStmt.executeUpdate();
-            if (rowsAffected > 0)
-            {
-                System.out.println("New brand added to database: " + brandName);
-                return newId;
-            }
+            if (rowsAffected<=0)
+                return -1;
+            System.out.println("New brand added to database: " + brandName);
+            return newId;
         } catch (SQLException e)
         {
             System.err.println("Error adding brand: " + brandName);
             e.printStackTrace();
+            return -1;
         }
-        return -1;
     }
-    public void addNoteToPerfume(int perfumeId, String noteName, NoteLayer layer) // to be changed
+    public void addNoteToPerfume(int perfumeId, String noteName, NoteLayer layer)
     {
-        Connection conn = dbConnection.getConnection();
-        int noteId = -1;
         try
         {
-            String findSql = "SELECT nota_id FROM prfm_note WHERE UPPER(nume_nota) = UPPER(?)";
-            try (PreparedStatement psFind = conn.prepareStatement(findSql))
+            int noteId = getNoteIdByName(noteName);
+
+            if (noteId == -1) // doesn't exist? create it
+                noteId = createNote(noteName);
+
+            if (noteId == -1)
             {
-                psFind.setString(1, noteName);
-                ResultSet rs = psFind.executeQuery();
-                if (rs.next())
-                    noteId = rs.getInt("nota_id");
-                else
-                {
-                    String idSql = "SELECT NVL(MAX(nota_id), 0) + 1 FROM prfm_note";
-                    try (PreparedStatement psId = conn.prepareStatement(idSql); ResultSet rsId = psId.executeQuery())
-                    {
-                        if (rsId.next()) noteId = rsId.getInt(1);
-                    }
-                    String insertNoteSql = "INSERT INTO prfm_note (nota_id, nume_nota) VALUES (?, ?)";
-                    try (PreparedStatement psIns = conn.prepareStatement(insertNoteSql))
-                    {
-                        psIns.setInt(1, noteId);
-                        psIns.setString(2, noteName.toUpperCase());
-                        psIns.executeUpdate();
-                    }
-                }
+                System.err.println("Failed to resolve note ID for: " + noteName);
+                return;
             }
+
             String linkSql = "INSERT INTO prfm_parfum_note (parfum_id, nota_id, tip_nota) VALUES (?, ?, ?)";
-            try (PreparedStatement psLink = conn.prepareStatement(linkSql))
+            try (PreparedStatement psLink = dbConnection.getConnection().prepareStatement(linkSql))
             {
                 psLink.setInt(1, perfumeId);
                 psLink.setInt(2, noteId);
-                psLink.setString(3, layer != null ? layer.name() : null);
+                if (layer!=null)
+                    psLink.setString(3, layer.name());
+                else psLink.setString(3,null);
                 psLink.executeUpdate();
             }
         } catch (SQLException e)
         {
-            System.err.println("Error linking note to perfume.");
+            System.err.println("Error linking note to perfume ID " + perfumeId);
             e.printStackTrace();
         }
     }
 
-    public void addSeasonToPerfume(int perfumeId, String seasonName)
+    public void addSeasonToPerfume(int perfumeId, String seasonName) throws SQLException
     {
         // to be added later in postgresql: INSERT ... ON CONFLICT DO NO NOTHING/UPDATE
         Connection conn = dbConnection.getConnection();
         int seasonId = -1;
-        try
+        seasonId=getSeasonIdByName(seasonName);
+        if (seasonId==-1) // doesn't exist? create it
+            seasonId = createSeason(seasonName);
+        if (seasonId == -1)
         {
-            String findSql = "SELECT sezon_id FROM prfm_sezoane WHERE UPPER(nume_sezon) = UPPER(?)";
-            try (PreparedStatement psFind = conn.prepareStatement(findSql))
-            {
-                psFind.setString(1, seasonName);
-                ResultSet rs = psFind.executeQuery();
-                if (rs.next())
-                    seasonId = rs.getInt("sezon_id");
-                else
-                {
-                    String idSql = "SELECT NVL(MAX(sezon_id), 0) + 1 FROM prfm_sezoane";
-                    try (PreparedStatement psId = conn.prepareStatement(idSql); ResultSet rsId = psId.executeQuery())
-                    {
-                        if (rsId.next()) seasonId = rsId.getInt(1);
-                    }
-                    String insertSeasonSql = "INSERT INTO prfm_sezoane (sezon_id, nume_sezon) VALUES (?, ?)";
-                    try (PreparedStatement psIns = conn.prepareStatement(insertSeasonSql))
-                    {
-                        psIns.setInt(1, seasonId);
-                        psIns.setString(2, seasonName.toUpperCase());
-                        psIns.executeUpdate();
-                    }
-                }
-            }
-            String linkSql = "INSERT INTO prfm_parfum_sezon (parfum_id, sezon_id) VALUES (?, ?)";
-            try (PreparedStatement psLink = conn.prepareStatement(linkSql))
-            {
+            System.err.println("Failed to resolve season ID for: " + seasonName);
+            return;
+        }
+        String sqlLink="INSERT INTO prfm_parfum_sezon (parfum_id, sezon_id) VALUES (?, ?)";
+        try (PreparedStatement psLink=conn.prepareStatement(sqlLink))
+        {
                 psLink.setInt(1, perfumeId);
                 psLink.setInt(2, seasonId);
                 psLink.executeUpdate();
-            }
         } catch (SQLException e)
         {
-            System.err.println("Error linking season to perfume.");
             e.printStackTrace();
         }
     }
@@ -421,5 +368,80 @@ public class PerfumeRepository
         loadSeasons(p,id);
 
         return p;
+    }
+
+    private int getNextId(String tableName, String columnName)
+    {
+        String sql = "SELECT NVL(MAX(" + columnName + "), 0) + 1 FROM " + tableName; // table and column names don't work via '?'
+        try (PreparedStatement pstmt= dbConnection.getConnection().prepareStatement(sql); ResultSet rs = pstmt.executeQuery())
+        {
+            if (rs.next())
+                return rs.getInt(1);
+        } catch (SQLException e)
+        {
+            System.err.println("Error calculating next ID for table: " + tableName);
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private int getNoteIdByName(String noteName) throws SQLException
+    {
+        String sql="select nota_id from prfm_note where upper(nume_nota)=upper(?)";
+        try(PreparedStatement pstmt =dbConnection.getConnection().prepareStatement(sql))
+        {
+          pstmt.setString(1,noteName);
+          try (ResultSet rs = pstmt.executeQuery())
+          {
+              if (rs.next())
+                return rs.getInt("nota_id");
+              return -1;
+          }
+        }
+    }
+
+    private int createNote(String noteName) throws SQLException
+    {
+        int newId=getNextId("prfm_note","nota_id");
+        if (newId==-1)
+            return -1;
+        String sql = "insert into prfm_note (nota_id,nume_nota) values (?,?)";
+        try (PreparedStatement pstmt = dbConnection.getConnection().prepareStatement(sql))
+        {
+            pstmt.setInt(1, newId);
+            pstmt.setString(2,noteName.toUpperCase());
+            pstmt.executeUpdate();
+            return newId;
+        }
+    }
+
+    private int getSeasonIdByName(String seasonName) throws SQLException
+    {
+        String sql="select sezon_id from prfm_sezoane where upper(nume_sezon)=upper(?)";
+        try (PreparedStatement pstmt = dbConnection.getConnection().prepareStatement(sql))
+        {
+            pstmt.setString(1,seasonName.toUpperCase());
+            try (ResultSet rs = pstmt.executeQuery())
+            {
+                if (rs.next())
+                    return rs.getInt("sezon_id");
+                return -1;
+            }
+        }
+    }
+
+    private int createSeason(String seasonName) throws SQLException
+    {
+        int newId=getNextId("prfm_sezoane","sezon_id");
+        if (newId==-1)
+            return -1;
+        String sql = "insert into prfm_sezoane(sezon_id,nume_sezon) values (?,?)";
+        try (PreparedStatement pstmt = dbConnection.getConnection().prepareStatement(sql))
+        {
+            pstmt.setInt(1, newId);
+            pstmt.setString(2,seasonName.toUpperCase());
+            pstmt.executeUpdate();
+            return newId;
+        }
     }
 }

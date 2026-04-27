@@ -188,6 +188,8 @@ public class Main
                                 } catch (IllegalArgumentException e)
                                 {
                                     System.out.println("  -> Invalid season. Please use SPRING, SUMMER, AUTUMN, or WINTER.");
+                                } catch (SQLException e) {
+                                    throw new RuntimeException(e);
                                 }
                             }
                             System.out.print("\nEnter a rating (0.0 - 10.0) or press Enter to skip: ");
