@@ -1,4 +1,38 @@
-<form action="recommend" method="GET">
-    <input type="text" name="perfumeName" placeholder="Enter perfume name...">
-    <button type="submit">Find Layers</button>
-</form>
+<body>
+<h1>=Perfume App=</h1>
+
+<div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+    <h3>Find layering matches</h3>
+<!--    <form action="recommend" method="GET">-->
+<!--        <input type="text" name="perfumeName" placeholder="Enter perfume name...">-->
+<!--        <button type="submit">Get Recommendations</button>-->
+<!--    </form>-->
+    <form action="recommend" method="GET">
+        <input type="text" name="perfumeName" placeholder="Enter perfume name..." required>
+
+        <label for="limit">Number of results:</label>
+        <select name="limit" id="limit">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+        </select>
+
+        <button type="submit">Get Recommendations</button>
+    </form>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 10px;">
+    <h3>Look up perfume info</h3>
+    <form action="view" method="GET"> <input type="text" name="perfumeName" placeholder="Enter perfume name...">
+        <button type="submit">View Details</button>
+    </form>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 10px;">
+    <h3>View all perfumes</h3>
+    <form action="catalog" method="GET">
+        <button type="submit">View Details</button>
+    </form>
+</div>
+
+</body>

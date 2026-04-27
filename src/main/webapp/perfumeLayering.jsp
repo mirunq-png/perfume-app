@@ -10,9 +10,10 @@
             for(Perfume p : results) {
         %>
             <li>
-                <strong><%= p.getBrand() %> - <%= p.getName() %></strong><br>
+                <strong><%= p.formatText(p.getBrand()) %> - <%= p.formatText(p.getName()) %></strong><br>
                 <%= base.getLayeringExplanation(p) %> </li>
         <% } %>
     </ul>
+    <a href="index.html">Back</a>
 </body>
 </html>

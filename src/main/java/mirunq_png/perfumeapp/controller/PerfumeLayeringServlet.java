@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/recommend")
-public class PerfumeServlet extends HttpServlet
+public class PerfumeLayeringServlet extends HttpServlet
 {
 
     private LayeringService service = new LayeringService();
@@ -37,8 +37,10 @@ public class PerfumeServlet extends HttpServlet
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         String inputName = request.getParameter("perfumeName");
+        String limitStr = request.getParameter("limit");
         try
         {
+            DatabaseConnection conn = DatabaseConnection.getInstance();
             int id = repo.getPerfumeIdByName(inputName);
             if (id == -1)
             {
@@ -54,11 +56,11 @@ public class PerfumeServlet extends HttpServlet
             }
 
             List<Perfume> allPerfumes = repo.getAllPerfumes();
-            List<Perfume> results = service.getRecommendations(basePerfume, allPerfumes, 5);
+            List<Perfume> results = service.getRecommendations(basePerfume, allPerfumes, Integer.parseInt(limitStr));
 
             request.setAttribute("base", basePerfume);
             request.setAttribute("results", results);
-            request.getRequestDispatcher("results.jsp").forward(request, response);
+            request.getRequestDispatcher("perfumeLayering.jsp").forward(request, response);
         }
         catch (Exception e)
         {
