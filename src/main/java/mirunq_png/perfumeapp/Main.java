@@ -13,11 +13,11 @@ public class Main
     public static void main(String[] args)
     {
         System.out.println("--- Perfume Application Initializing ---");
-        DatabaseConnection dbCon = null;
+        DatabaseConnection conn = null;
         try
         {
-            dbCon = DatabaseConnection.getInstance();
-            if (dbCon.getConnection() != null && !dbCon.getConnection().isClosed())
+            conn = DatabaseConnection.getInstance();
+            if (conn.getConnection() != null && !conn.getConnection().isClosed())
                 System.out.println("Successfully connected to database!");
         } catch (SQLException e)
         {
@@ -28,7 +28,7 @@ public class Main
             throw new RuntimeException(e);
         }
 
-        PerfumeRepository repository = new PerfumeRepository(dbCon);
+        PerfumeRepository repository = new PerfumeRepository(conn);
         LayeringService service = new LayeringService();
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -231,8 +231,8 @@ public class Main
                     break;
                 case "0":
                     System.out.println("Cleaning up resources...");
-                    if (dbCon != null)
-                        dbCon.closeConnection();
+                    if (conn != null)
+                        conn.closeConnection();
                     System.out.println("Exiting application. Goodbye!");
                     running = false;
                     break;
