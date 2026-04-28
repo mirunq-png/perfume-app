@@ -1,5 +1,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="mirunq_png.perfumeapp.model.Perfume" %>
+<%@ page import="mirunq_png.perfumeapp.utility.StringUtils" %>
 <html>
 <body>
     <% Perfume base = (Perfume) request.getAttribute("base"); %>
@@ -10,7 +11,7 @@
             for(Perfume p : results) {
         %>
             <li>
-                <strong><%= p.formatText(p.getBrand()) %> - <%= p.formatText(p.getName()) %></strong><br>
+                <strong><%= StringUtils.formatText(p.getBrand()) %> - <%= StringUtils.formatText(p.getName()) %></strong><br>
                 <%= base.getLayeringExplanation(p) %> </li>
         <% } %>
     </ul>

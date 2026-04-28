@@ -3,6 +3,7 @@
 <%@ page import="mirunq_png.perfumeapp.model.Season" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="mirunq_png.perfumeapp.utility.StringUtils" %>
 
 <html>
 <head>
@@ -13,7 +14,7 @@
         Perfume p = (Perfume) request.getAttribute("perfume");
         if (p != null) {
     %>
-        <h1><%= p.formatText(p.getBrand()) %> - <%= p.formatText(p.getName()) %></h1>
+        <h1><%= StringUtils.formatText(p.getBrand()) %> - <%= StringUtils.formatText(p.getName()) %></h1>
 
         <h3>Best seasons for this scent:</h3>
         <ul>
@@ -25,7 +26,7 @@
             <% } else {
                 for (Season s : seasons) {
             %>
-                <li><strong><%= p.formatText(s.name()) %></strong></li>
+                <li><strong><%= StringUtils.formatText(s.name()) %></strong></li>
             <% } } %>
         </ul>
 
@@ -35,7 +36,7 @@
                 List<Note> notes = p.getNotes();
                 for (Note n : notes) {
             %>
-                <li><%= p.formatText(n.getName()) %> (<%= n.getLayer() %>)</li>
+                <li><%= StringUtils.formatText(n.getName()) %> (<%= n.getLayer() %>)</li>
             <% } %>
         </ul>
 

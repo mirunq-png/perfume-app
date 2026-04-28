@@ -2,6 +2,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="mirunq_png.perfumeapp.model.Perfume" %>
 <%@ page import="mirunq_png.perfumeapp.model.Note" %>
+<%@ page import="mirunq_png.perfumeapp.utility.StringUtils" %>
 
 <html>
 <head>
@@ -31,7 +32,7 @@
                     for (Perfume p : perfumes) {
             %>
                 <tr>
-                    <td><%= p.formatText(p.getBrand()) %></td> <td><%= p.formatText(p.getName()) %></td> <td>
+                    <td><%= StringUtils.formatText(p.getBrand()) %></td> <td><%= StringUtils.formatText(p.getName()) %></td> <td>
                         <a href="view?perfumeName=<%= p.getName() %>">Click here</a>
                     </td>
                 </tr>
