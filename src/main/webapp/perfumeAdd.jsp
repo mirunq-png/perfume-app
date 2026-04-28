@@ -1,11 +1,9 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <html>
 <head>
     <title>Add a New Perfume</title>
     <style>
         body {
-            /* Changed to serif to match the details page */
             font-family: serif;
             margin: 20px;
         }
@@ -23,7 +21,7 @@
             font-weight: bold;
         }
         input[type="text"], input[type="number"], select {
-            font-family: serif; /* Ensures inputs match the body font */
+            font-family: serif;
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -42,8 +40,8 @@
         .back-link {
             display: inline-block;
             margin-top: 15px;
-            text-decoration: underline; /* Matches the link style in your image */
-            color: #0000EE; /* Standard browser link purple/blue */
+            text-decoration: underline;
+            color: #0000EE;
         }
         .hidden {
             display: none;

@@ -76,7 +76,7 @@ public class Perfume
     //get
     public String getName() { return name; }
     public String getBrand() { return brand; }
-//    public int getMl() {return ml;}
+    public int getMl() {return ml;}
     public List<Note> getNotes() { return notes; }
     public Set<Season> getSeasons() {return seasons;}
     public float getRating() { return rating; }

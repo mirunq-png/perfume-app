@@ -125,7 +125,14 @@ public class PerfumeRepository
         String sql = "SELECT n.nume_nota, pn.tip_nota " +
                 "FROM prfm_parfum_note pn, prfm_note n " +
                 "WHERE pn.nota_id = n.nota_id " +
-                "  AND pn.parfum_id = ?";
+                "  AND pn.parfum_id = ? " +
+                "ORDER BY " +
+                "  CASE UPPER(pn.tip_nota) " +
+                "    WHEN 'TOP' THEN 1 " +
+                "    WHEN 'HEART' THEN 2 " +
+                "    WHEN 'BASE' THEN 3 " +
+                "    ELSE 4 " +
+                "  END";
 
         Connection conn = dbConnection.getConnection();
 
