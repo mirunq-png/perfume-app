@@ -43,6 +43,6 @@
     </table>
 
     <br>
-    <a href="index.html">Back to Main Menu</a>
+    <a href="index.html">Return to main page</a>
 </body>
 </html>

@@ -14,6 +14,6 @@
                 <%= base.getLayeringExplanation(p) %> </li>
         <% } %>
     </ul>
-    <a href="index.html">Back</a>
+    <a href="index.html">Return to main page</a>
 </body>
 </html>

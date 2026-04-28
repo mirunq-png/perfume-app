@@ -15,19 +15,23 @@ import java.sql.SQLException;
 @WebServlet("/view")
 public class PerfumeInfoServlet extends HttpServlet
 {
+    private PerfumeRepository pr;
+    @Override
+    public void init() throws ServletException
+    {
+        try
+        {
+            DatabaseConnection conn = DatabaseConnection.getInstance();
+            pr = new PerfumeRepository(conn);
+        } catch (SQLException | ClassNotFoundException e)
+        {
+            throw new ServletException("Failed to initialize database connection", e);
+        }
+    }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         String inputName = request.getParameter("perfumeName");
-        DatabaseConnection conn= null;
-        try {
-            conn = DatabaseConnection.getInstance();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        PerfumeRepository pr=new PerfumeRepository(conn);
         int id=pr.getPerfumeIdByName(inputName);
         Perfume p=pr.getPerfumeById(id);
 

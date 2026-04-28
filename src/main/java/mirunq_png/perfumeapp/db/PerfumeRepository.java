@@ -444,4 +444,20 @@ public class PerfumeRepository
             return newId;
         }
     }
+
+    public List<String> getAllBrandNames()
+    {
+        List<String> brands = new ArrayList<>();
+        String sql = "select nume_brand from prfm_branduri order by nume_brand";
+        Connection conn = dbConnection.getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery())
+        {
+            while (rs.next())
+                brands.add(rs.getString("nume_brand"));
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return brands;
+    }
 }

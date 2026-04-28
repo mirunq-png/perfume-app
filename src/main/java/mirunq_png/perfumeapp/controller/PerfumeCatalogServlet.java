@@ -16,21 +16,26 @@ import java.util.List;
 @WebServlet("/catalog")
 public class PerfumeCatalogServlet extends HttpServlet
 {
+    private PerfumeRepository pr;
+    @Override
+    public void init() throws ServletException
+    {
+        try
+        {
+            DatabaseConnection conn = DatabaseConnection.getInstance();
+            pr = new PerfumeRepository(conn);
+        } catch (SQLException | ClassNotFoundException e)
+        {
+            throw new ServletException("Failed to initialize database connection", e);
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        DatabaseConnection conn= null;
-        try {
-            conn = DatabaseConnection.getInstance();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        PerfumeRepository rp=new PerfumeRepository(conn);
-        List<Perfume> allPerfumes=rp.getAllPerfumes();
+        List<Perfume> allPerfumes=pr.getAllPerfumes();
         System.out.println("[debug] nr parfumuri: " + allPerfumes.size());
-        request.setAttribute("catalog",rp.getAllPerfumes());
+        request.setAttribute("catalog",pr.getAllPerfumes());
         request.getRequestDispatcher("perfumeCatalog.jsp").forward(request, response);
     }
 

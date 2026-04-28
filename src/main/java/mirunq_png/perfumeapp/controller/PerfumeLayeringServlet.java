@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet("/recommend")
@@ -18,18 +19,17 @@ public class PerfumeLayeringServlet extends HttpServlet
 {
 
     private LayeringService service = new LayeringService();
-    private PerfumeRepository repo;
-
+    private PerfumeRepository pr;
     @Override
     public void init() throws ServletException
     {
         try
         {
-            DatabaseConnection dbConn = DatabaseConnection.getInstance();
-            repo = new PerfumeRepository(dbConn);
-        } catch (Exception e)
+            DatabaseConnection conn = DatabaseConnection.getInstance();
+            pr = new PerfumeRepository(conn);
+        } catch (SQLException | ClassNotFoundException e)
         {
-            throw new ServletException("Failed to initialize DB: " + e.getMessage(), e);
+            throw new ServletException("Failed to initialize database connection", e);
         }
     }
 
@@ -41,21 +41,21 @@ public class PerfumeLayeringServlet extends HttpServlet
         try
         {
             DatabaseConnection conn = DatabaseConnection.getInstance();
-            int id = repo.getPerfumeIdByName(inputName);
+            int id = pr.getPerfumeIdByName(inputName);
             if (id == -1)
             {
                 response.getWriter().println("Perfume '" + inputName + "' not found.");
                 return;
             }
 
-            Perfume basePerfume = repo.getPerfumeById(id);
+            Perfume basePerfume = pr.getPerfumeById(id);
             if (basePerfume == null)
             {
                 response.getWriter().println("Found ID " + id + " but failed to load perfume object.");
                 return;
             }
 
-            List<Perfume> allPerfumes = repo.getAllPerfumes();
+            List<Perfume> allPerfumes = pr.getAllPerfumes();
             List<Perfume> results = service.getRecommendations(basePerfume, allPerfumes, Integer.parseInt(limitStr));
 
             request.setAttribute("base", basePerfume);

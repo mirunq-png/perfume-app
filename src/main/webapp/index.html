@@ -3,10 +3,6 @@
 
 <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
     <h3>Find layering matches</h3>
-<!--    <form action="recommend" method="GET">-->
-<!--        <input type="text" name="perfumeName" placeholder="Enter perfume name...">-->
-<!--        <button type="submit">Get Recommendations</button>-->
-<!--    </form>-->
     <form action="recommend" method="GET">
         <input type="text" name="perfumeName" placeholder="Enter perfume name..." required>
 
@@ -23,7 +19,7 @@
 
 <div style="border: 1px solid #ccc; padding: 10px;">
     <h3>Look up perfume info</h3>
-    <form action="view" method="GET"> <input type="text" name="perfumeName" placeholder="Enter perfume name...">
+    <form action="view" method="GET"> <input type="text" name="perfumeName" placeholder="Enter perfume name..." required>
         <button type="submit">View Details</button>
     </form>
 </div>
@@ -35,4 +31,10 @@
     </form>
 </div>
 
+<div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
+    <h3>Add a new perfume</h3>
+    <form action="add" method="GET">
+        <button type="submit">Add a New Perfume</button>
+    </form>
+</div>
 </body>

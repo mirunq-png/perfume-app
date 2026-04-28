@@ -40,7 +40,7 @@
         </ul>
 
         <br>
-        <a href="index.html">Back</a>
+        <a href="index.html">Return to main page</a>
     <% } else { %>
         <p>Perfume details not found.</p>
         <a href="index.html">Try another search</a>
