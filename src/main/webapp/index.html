@@ -1,53 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>=Perfume app=</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
 <body>
 
-<div style="color: #ff1493;font-weight: bold;">
-    <h1>=Perfume App=</h1>
-</div>
+<h1>=Perfume app=</h1>
 
+<table border="1">
+    <thead>
+    <tr>
+        <th>Brand</th>
+        <th>Name</th>
+        <th>Quantity (ml)</th>
+        <th>Notes</th>
+        <th>Rating</th>
+    </tr>
+    </thead>
+    <tbody id="perfume-table-body">
+    </tbody>
+</table>
 
-<div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-    <h3>Find layering matches</h3>
-    <form action="recommend" method="GET">
-        <input type="text" name="perfumeName" placeholder="Enter perfume name..." required>
-
-        <label for="limit">Number of results:</label>
-        <select name="limit" id="limit">
-            <option value="3">3</option>
-            <option value="5" selected>5</option>
-            <option value="10">10</option>
-        </select>
-
-        <button type="submit">Get Recommendations</button>
-    </form>
-</div>
-
-<div style="border: 1px solid #ccc; padding: 10px;">
-    <h3>Look up perfume info</h3>
-    <form action="view" method="GET"> <input type="text" name="perfumeName" placeholder="Enter perfume name..." required>
-        <button type="submit">View Details</button>
-    </form>
-</div>
-
-<div style="border: 1px solid #ccc; padding: 10px;">
-    <h3>View all perfumes</h3>
-    <form action="catalog" method="GET">
-        <button type="submit">View Details</button>
-    </form>
-</div>
-
-<div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
-    <h3>Add a new perfume</h3>
-    <form action="add" method="GET">
-        <button type="submit">Add a New Perfume</button>
-    </form>
-</div>
-
-<div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-    <h3>Search by Note</h3>
-    <form action="search" method="GET">
-        <input type="text" name="note" placeholder="e.g. Vanilla, Musk" required>
-        <button type="submit">Search</button>
-    </form>
-</div>
-
+<script src="js/app.js"></script>
 </body>
+</html>

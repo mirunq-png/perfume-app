@@ -1,0 +1,25 @@
+.notes-column-container {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+    min-width: 400px;
+}
+
+.note-col {
+    flex: 1;
+    font-size: 0.85em;
+    border-right: 1px solid #ddd;
+    padding-right: 10px;
+}
+
+.note-col:last-child {
+    border-right: none;
+}
+
+.note-col strong {
+    color: #444;
+    text-transform: uppercase;
+    font-size: 0.75em;
+    display: block;
+    margin-bottom: 5px;
+}
