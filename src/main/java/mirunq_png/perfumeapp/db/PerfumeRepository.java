@@ -373,7 +373,7 @@ public class PerfumeRepository
             p.addRating(rating);
         loadNotes(p,id);
         loadSeasons(p,id);
-
+        addId(p,id);
         return p;
     }
 
@@ -466,5 +466,9 @@ public class PerfumeRepository
             e.printStackTrace();
         }
         return brands;
+    }
+    private void addId(Perfume p, int id)
+    {
+        p.addId(id);
     }
 }

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfume Collection</title> <!--name in taskbar-->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="menu-container">
+    <h2 id="current-perfume-display" style="color: #E0588D;"></h2>
+    <p>How many recommendations do you want?</p>
+    <input type="number" id="rec-count" min="1" value="3">
+    <button onclick="generateRecommendations()">Find Matches</button>
+    <div id="results-container" style="margin-top: 20px;"></div>
+
+    <br>
+    <a href="collection.html"><button>Back to Collection</button></a>
+</div>
+
+<script src="js/layer.js"></script>
+</body>
+</html>
