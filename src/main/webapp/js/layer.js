@@ -29,7 +29,7 @@ async function generateRecommendations()
 {
     const countInput = document.getElementById('rec-count').value;
     const numberOfRecs = parseInt(countInput);
-    const resultsContainer = document.getElementById('results-container');
+    const resultsContainer = document.getElementById('results-container-layer');
     resultsContainer.innerHTML = '<p>Finding the perfect matches...</p>';
 
     if (!targetPerfumeId)
@@ -64,8 +64,8 @@ async function generateRecommendations()
             htmlOutput += `
                 <li class="match-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <strong>Match #${index + 1}:</strong> ${brand} - ${name}
-                        <span>${score}</span>
+                        <strong>[${index + 1}] ${brand} - ${name}</strong>
+                        ${score}
                     </div>
                     <details style="cursor: pointer; font-size: 0.9em; color: #555;">
                         <summary style="font-weight: bold; color: #E0588D;">Why this works?</summary>

@@ -5,6 +5,7 @@ import mirunq_png.perfumeapp.db.DatabaseConnection;
 import mirunq_png.perfumeapp.db.PerfumeRepository;
 import mirunq_png.perfumeapp.model.Perfume;
 import mirunq_png.perfumeapp.service.LayeringService;
+import mirunq_png.perfumeapp.service.SearchService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -43,6 +44,7 @@ public class PerfumeApiServlet extends HttpServlet
         response.setCharacterEncoding("UTF-8"); // for character accents
         response.setHeader("Access-Control-Allow-Origin", "*"); // for future ports
         String idParam = request.getParameter("id");
+        String noteParam = request.getParameter("note");
         List<Perfume> perfumes = pr.getAllPerfumes();
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(perfumes);
@@ -76,6 +78,14 @@ public class PerfumeApiServlet extends HttpServlet
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.print("{\"error\": \"Invalid request\"}");
             }
+        }
+        else if (noteParam!=null)
+        {
+            // FILTER LOGIC
+            List<Perfume> allPerfumes = pr.getAllPerfumes();
+            SearchService ss = new SearchService();
+            List<Perfume> filteredResults = ss.searchByNote(allPerfumes, noteParam);
+            out.print(mapper.writeValueAsString(filteredResults));
         }
         else // DEFAULT: ALL PERFUMES
             out.print(json);

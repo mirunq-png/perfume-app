@@ -41,7 +41,7 @@ async function loadPerfumes()
                     <td style="vertical-align: middle;">
                                 <div class="action-buttons" style="display:none;">
                                     <button onclick="window.location.href='layer.html?id=${p.id}'">Layer</button>
-                                    <button onclick="edit(${p.id})">Edit</button>
+                                    <button onclick="window.location.href='edit.html?id=${p.id}'">Edit</button>
                                 </div>
                             </td>
                 </tr>
