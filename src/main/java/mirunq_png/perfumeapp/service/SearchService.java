@@ -11,17 +11,17 @@ import java.util.List;
 
 public class SearchService
 {
-    public List<Perfume> searchByNote(List<Perfume>all, String noteName)
+    public List<Perfume> searchByNote(List<Perfume>all, String searchedNote)
     {
-        if (all ==null || all.isEmpty() || noteName == null)
+        if (all ==null || all.isEmpty() || searchedNote == null)
             throw new RuntimeException();
         List<Perfume>results=new ArrayList<>();
         for (var p:all)
         {
             var notes=p.getNotes();
             for (var n:notes)
-                if (n.getName().toLowerCase().contains(noteName.toLowerCase()))
-                {
+                if (n.getName().matches("(?i).*\\b" + searchedNote + "\\b.*")) // ?i flag makes the whole expression case-insensitive; logic: .* - wild card, allows anything; \\b - word boundary
+                { // => 'vanilla' will work for both bourbon vanilla and vanilla absolute
                     results.add(p);
                     break;
                 }
