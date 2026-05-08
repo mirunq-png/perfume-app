@@ -3,7 +3,9 @@ package mirunq_png.perfumeapp.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mirunq_png.perfumeapp.db.DatabaseConnection;
 import mirunq_png.perfumeapp.db.PerfumeRepository;
+import mirunq_png.perfumeapp.model.NoteLayer;
 import mirunq_png.perfumeapp.model.Perfume;
+import mirunq_png.perfumeapp.model.Type;
 import mirunq_png.perfumeapp.service.LayeringService;
 import mirunq_png.perfumeapp.service.SearchService;
 
@@ -90,5 +92,87 @@ public class PerfumeApiServlet extends HttpServlet
         else // DEFAULT: ALL PERFUMES
             out.print(json);
         out.flush();
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            Map<String, Object> perfumeData = mapper.readValue(request.getReader(), Map.class);
+            String brand = (String) perfumeData.get("brand");
+            String name = (String) perfumeData.get("name");
+            int status = pr.checkAvailability(brand, name);
+            if (status == 1) //already exists
+            {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"error\": \"This perfume is already in your collection.\"}");
+            }
+            else if (status == 0) //exists; is disabled
+            {
+                pr.updateActiv(brand,name,1);
+                response.setStatus(HttpServletResponse.SC_OK);
+                out.print("{\"message\": \"Perfume already exists and is disabled- enabled successfully!\"}");
+            }
+            else //doesn't exist; create it
+            {
+                // brand (name) and name (for perfume) already extracted
+                int ml=(Integer)perfumeData.get("ml");
+                String typeStr=(String)perfumeData.get("type");
+                Type type;
+                if (typeStr!=null&&!typeStr.isBlank())
+                    type=Type.valueOf(typeStr.toUpperCase());
+                else type=Type.EDP;
+                //float rating=(Float)perfumeData.get("rating"); // float cast can crash bc of jackson
+                float rating=perfumeData.get("rating") != null ? ((Number) perfumeData.get("rating")).floatValue() : 0;
+                int brandId=pr.getBrandIdByName(brand);
+                if (brandId==-1) // brand doesn't already exist, add it
+                    brandId=pr.addBrand(brand);
+                if (brandId==-1) // pr.addBrand somehow failed
+                {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    out.print("{\"error\": \"Could not resolve brand.\"}");
+                    return;
+                }
+                int id=pr.addPerfume(name,brandId,ml,type);
+                if (id==-1) // pr.addPerfume somehow failed
+                {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    out.print("{\"error\": \"Could not insert perfume.\"}");
+                    return;
+                }
+                if (rating>0)
+                    pr.addRatingToPerfume(id,rating);
+                else pr.addRatingToPerfume(id,0);
+                String topNotes   = (String) perfumeData.get("topNotes");
+                String heartNotes = (String) perfumeData.get("heartNotes");
+                String baseNotes  = (String) perfumeData.get("baseNotes");
+                processNotes(id, topNotes, NoteLayer.TOP);
+                processNotes(id, heartNotes, NoteLayer.HEART);
+                processNotes(id, baseNotes, NoteLayer.BASE);
+                String seasons=(String)perfumeData.get("seasons");
+                if (seasons!=null&&!seasons.trim().isEmpty())
+                    for (String s:seasons.split(","))
+                        pr.addSeasonToPerfume(id,s.trim());
+                response.setStatus(HttpServletResponse.SC_CREATED);
+                out.print("{\"message\": \"Perfume added successfully!\"}");
+            }
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("{\"error\": \"Server error: " + e.getMessage() + "\"}");
+        }
+        out.flush();
+    }
+    private void processNotes(int perfumeId, String notesStr, NoteLayer layer)
+    {
+        if (notesStr != null && !notesStr.trim().isEmpty())
+        {
+            String[] notes = notesStr.split(",");
+            for (String note : notes)
+                pr.addNoteToPerfume(perfumeId, note.trim(), layer);
+        }
     }
 }

@@ -1,9 +1,3 @@
-function formatText(input)
-{
-    if (!input) return '';
-    return input.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
-
 async function filterByNote()
 {
     const noteInput = document.getElementById('searched-note').value;
@@ -16,7 +10,7 @@ async function filterByNote()
         }
         try
         {
-            const response = await fetch(`api/perfume?note=${encodeURIComponent(noteInput)}`); // encodeURIComponent in case of illegal characters e.g. &
+            const response = await fetch(`api/perfume?note=${encodeURIComponent(noteInput.trim())}`); // encodeURIComponent in case of illegal characters e.g. &
             if (!response.ok)
             throw new Error("Failed to fetch from API");
 
@@ -24,7 +18,7 @@ async function filterByNote()
 
             if (perfumes.length === 0)
             {
-                resultsContainer.innerHTML = `<p>No perfumes found with the note: <strong>${formatText(noteInput)}</strong></p>`;
+                resultsContainer.innerHTML = `<p>No perfumes found with the note: <strong>${formatText(noteInput.trim())}</strong></p>`;
                 return;
             }
 

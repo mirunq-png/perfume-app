@@ -1,13 +1,6 @@
 const urlParams = new URLSearchParams(window.location.search);
 const targetPerfumeId = urlParams.get('id'); //grabs id from url
 
-
-function formatText(input)
-{
-    if (!input) return '';
-    return input.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
-
 async function init()
 {
     if (!targetPerfumeId) return;

@@ -471,4 +471,93 @@ public class PerfumeRepository
     {
         p.addId(id);
     }
+
+    public int checkAvailability(String brand, String name) throws SQLException
+    {
+        String sql="select p.activ from prfm_parfumuri p, prfm_branduri b where p.brand_id=b.brand_id and upper(b.nume_brand)=upper(?) and upper(p.nume_parfum)=upper(?)";
+        Connection conn=dbConnection.getConnection();
+        try (PreparedStatement pstmt=conn.prepareStatement(sql))
+        {
+            pstmt.setString(1,brand);
+            pstmt.setString(2,name);
+            try (ResultSet rs = pstmt.executeQuery())
+                {
+                    if (rs.next())
+                        return rs.getInt("activ");
+                }
+            return -1;
+        }
+    }
+
+    public void updatePerfume(int id, String name, int brandId, int ml, Type type)
+    {
+        String sql="update prfm_parfumuri set nume_parfum=? ,brand_id=? ,tip_parfum=?, cantitate_ml=? where parfum_id=?";
+        Connection conn=dbConnection.getConnection();
+        try (PreparedStatement pstmt=conn.prepareStatement(sql))
+        {
+            pstmt.setString(1,name);
+            pstmt.setInt(2,brandId);
+            pstmt.setString(3,type!=null?type.name():null); //type.toString() would break if type is null
+            pstmt.setInt(4,ml);
+            pstmt.setInt(5,id);
+            pstmt.executeUpdate();
+        } catch (SQLException e)
+        {
+            System.err.println("Error updating perfume for ID "+id);
+            e.printStackTrace();
+        }
+    }
+    public void updateNotesForPerfume(int id, List<Note> notes)
+    {
+        String sqlClear="delete from prfm_parfum_note where parfum_id=?";
+        Connection conn = dbConnection.getConnection();
+        try (PreparedStatement pstmt1 =conn.prepareStatement(sqlClear))
+        {
+            pstmt1.setInt(1, id);
+            pstmt1.executeUpdate();
+            for (int i=0;i<notes.size();i++)
+            {
+                String n=notes.get(i).getName();
+                NoteLayer l=notes.get(i).getLayer();
+                addNoteToPerfume(id,n,l);
+            }
+        }catch(SQLException e)
+        {
+            System.err.println("Error updating notes for ID "+id);
+            e.printStackTrace();
+        }
+    }
+    public void updateSeasonsForPerfume(int id, List<Season> seasons)
+    {
+        String sqlClear="delete from prfm_parfum_sezon where parfum_id=?";
+        Connection conn = dbConnection.getConnection();
+        try (PreparedStatement pstmt1=conn.prepareStatement(sqlClear))
+        {
+            pstmt1.setInt(1, id);
+            pstmt1.executeUpdate();
+            for(Season s:seasons)
+                addSeasonToPerfume(id,s.toString());
+        }catch(SQLException e)
+        {
+            System.err.println("Error updating seasons for ID "+id);
+            e.printStackTrace();
+        }
+    }
+    public boolean updateActiv(String brand, String name, int activ)
+    {
+        String sql="update prfm_parfumuri set activ=? where brand_id=(select brand_id from prfm_branduri where upper(nume_brand)=upper(?)) and upper(nume_parfum)=upper(?)";
+        Connection conn=dbConnection.getConnection();
+        try (PreparedStatement pstmt =conn.prepareStatement(sql))
+        {
+            pstmt.setInt(1,activ);
+            pstmt.setString(2,brand);
+            pstmt.setString(3,name);
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e)
+        {
+            System.err.println("Error updating active column for perfume "+name);
+            return false;
+        }
+    }
 }
