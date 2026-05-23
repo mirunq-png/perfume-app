@@ -45,13 +45,31 @@ public class PerfumeApiServlet extends HttpServlet
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8"); // for character accents
         response.setHeader("Access-Control-Allow-Origin", "*"); // for future ports
-        String idParam = request.getParameter("id");
-        String noteParam = request.getParameter("note");
+        String idParam = request.getParameter("id"); // to trigger the layering data for a perfume
+        String noteParam = request.getParameter("note"); // to trigger filtering
+        String fetchParam=request.getParameter("fetch"); // to trigger a perfume's data
         List<Perfume> perfumes = pr.getAllPerfumes();
         ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(perfumes);
+        String json = mapper.writeValueAsString(perfumes); // default, contains the data of all perfumes
         PrintWriter out = response.getWriter();
-        if (idParam != null)
+        if (fetchParam != null)
+        {
+            // SINGULAR PERFUME DATA
+            try {
+                int target = Integer.parseInt(fetchParam);
+                Perfume p = pr.getPerfumeById(target);
+                if (p == null) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.print("{\"error\": \"Perfume not found\"}");
+                } else
+                    out.print(mapper.writeValueAsString(p));
+            } catch (Exception e)
+            {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"error\": \"Invalid id\"}");
+            }
+        }
+        else if (idParam != null)
         {
             // LAYER LOGIC
             try {

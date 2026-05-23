@@ -14,9 +14,10 @@ async function loadPerfumes()
         perfumes.forEach(p =>
         {
         console.log(p);
-            const topNotes = p.notes.filter(n => n.layer === 'TOP').map(n => n.name).join(', ') || '-';
-            const heartNotes = p.notes.filter(n => n.layer === 'HEART').map(n => n.name).join(', ') || '-';
-            const baseNotes = p.notes.filter(n => n.layer === 'BASE').map(n => n.name).join(', ') || '-';
+            const topNotes = p.notes.filter(n => n.layer === 'TOP').map(n => n.name).join(', ') || '-'; // only grabs the notes marked as top
+            const heartNotes = p.notes.filter(n => n.layer === 'HEART').map(n => n.name).join(', ') || '-'; // similar
+            const baseNotes = p.notes.filter(n => n.layer === 'BASE').map(n => n.name).join(', ') || '-'; // similar
+            const seasons=p.seasons&&p.seasons.length>0 ? p.seasons.join(', '):'-'; // handles the case if there are no seasons added
             const row = `
                 <tr id="row-${p.parfum_id}">
                     <td><input type="radio" name="perfume-select" onclick="handleSelect(this)"></td>
@@ -30,6 +31,7 @@ async function loadPerfumes()
                             <div class="note-col"><strong>Base</strong> ${formatText(baseNotes)}</div>
                         </div>
                     </td>
+                    <td>${formatText(seasons)}</td>
                     <td style="vertical-align: middle;">
                         ${p.rating ? p.rating + '/10' : 'N/A'}
                     </td>
