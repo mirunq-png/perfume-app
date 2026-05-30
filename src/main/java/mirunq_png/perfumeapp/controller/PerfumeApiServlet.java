@@ -3,9 +3,7 @@ package mirunq_png.perfumeapp.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mirunq_png.perfumeapp.db.DatabaseConnection;
 import mirunq_png.perfumeapp.db.PerfumeRepository;
-import mirunq_png.perfumeapp.model.NoteLayer;
-import mirunq_png.perfumeapp.model.Perfume;
-import mirunq_png.perfumeapp.model.Type;
+import mirunq_png.perfumeapp.model.*;
 import mirunq_png.perfumeapp.service.LayeringService;
 import mirunq_png.perfumeapp.service.SearchService;
 
@@ -191,6 +189,72 @@ public class PerfumeApiServlet extends HttpServlet
             String[] notes = notesStr.split(",");
             for (String note : notes)
                 pr.addNoteToPerfume(perfumeId, note.trim(), layer);
+        }
+    }
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException // edits a perfume
+    {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        ObjectMapper mapper = new ObjectMapper();
+        try
+        {
+            // load data
+            Map<String, Object> perfumeData= mapper.readValue(request.getReader(), Map.class);
+            int id=(Integer)perfumeData.get("id");
+            String name=(String)perfumeData.get("name");
+            String brand=(String)perfumeData.get("brand");
+            int ml=(Integer)perfumeData.get("ml");
+            String typeStr=(String)perfumeData.get("type");
+            Type type=null;
+            if (typeStr!=null&&!typeStr.isBlank())
+                type=Type.valueOf(typeStr.toUpperCase());
+            float rating=(float)perfumeData.get("rating");
+            int brandId=pr.getBrandIdByName(brand);
+            if (brandId==-1) // is the brand new?
+                brandId=pr.addBrand(brand);
+            if (brandId==-1) // pr.addBrand somehow failed
+            {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"error\": \"Could not resolve brand.\"}");
+                return;
+            }
+            // actual updates
+            pr.updatePerfume(id,name,brandId,ml,type);
+            pr.addRatingToPerfume(id,rating);
+            // notes and seasons are wiped and reinserted
+            String topNotes=(String)perfumeData.get("topNotes");
+            String heartNotes=(String)perfumeData.get("heartNotes");
+            String baseNotes=(String)perfumeData.get("baseNotes");
+            List<Note> notes=new ArrayList<>();
+            processNotes2(notes, topNotes, NoteLayer.TOP);
+            processNotes2(notes, heartNotes, NoteLayer.HEART);
+            processNotes2(notes, baseNotes, NoteLayer.BASE);
+            pr.updateNotesForPerfume(id,notes);
+            //
+            String seasons=(String)perfumeData.get("seasons");
+            List <Season> seasonList=new ArrayList<>();
+            if (seasons!=null&&!seasons.trim().isEmpty())
+                for (String s:seasons.split(","))
+                    seasonList.add(Season.valueOf(s.trim().toUpperCase()));
+            pr.updateSeasonsForPerfume(id,seasonList);
+            response.setStatus(HttpServletResponse.SC_OK);
+            out.print("{\"message\": \"Perfume updated successfully!\"}");
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("{\"error\": \"Server error: " + e.getMessage() + "\"}");
+        }
+        out.flush();
+    }
+    private void processNotes2(List <Note> notes, String notesStr, NoteLayer layer)
+    { // necessary because the other method called pr.addNoteToPerfume
+        if (notesStr != null && !notesStr.trim().isEmpty())
+        {
+            String[] splitNotes = notesStr.split(",");
+                for (String n : splitNotes)
+                    notes.add(new Note(n.trim(), layer));
         }
     }
 }
