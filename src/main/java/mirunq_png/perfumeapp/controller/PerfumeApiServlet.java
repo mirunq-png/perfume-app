@@ -122,13 +122,6 @@ public class PerfumeApiServlet extends HttpServlet
             String brand = ((String) perfumeData.get("brand")).toUpperCase();
             String name = ((String) perfumeData.get("name")).toUpperCase();
             int status = pr.checkAvailability(brand, name);
-            // --- TOMCAT CONSOLE DEBUG PRINT ---
-            System.out.println("=========================================");
-            System.out.println("DEBUG: Raw brand from form: " + perfumeData.get("brand"));
-            System.out.println("DEBUG: Forced UPPER brand:  " + brand);
-            System.out.println("DEBUG: Raw name from form:  " + perfumeData.get("name"));
-            System.out.println("DEBUG: Forced UPPER name:   " + name);
-            System.out.println("=========================================");
             if (status == 1) //already exists
             {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
