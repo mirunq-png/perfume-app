@@ -317,7 +317,6 @@ public class PerfumeRepository
 
     public void addSeasonToPerfume(int perfumeId, String seasonName) throws SQLException
     {
-        // to be added later in postgresql: INSERT ... ON CONFLICT DO NO NOTHING/UPDATE
         Connection conn = dbConnection.getConnection();
         int seasonId = -1;
         seasonId=getSeasonIdByName(seasonName);
@@ -328,8 +327,9 @@ public class PerfumeRepository
             System.err.println("Failed to resolve season ID for: " + seasonName);
             return;
         }
-        String sqlLink="INSERT INTO prfm_parfum_sezon (parfum_id, sezon_id) VALUES (?, ?)";
-        try (PreparedStatement psLink=conn.prepareStatement(sqlLink))
+//        String sql="INSERT INTO prfm_parfum_sezon (parfum_id, sezon_id) VALUES (?, ?)"; // ORACLE
+        String sql="INSERT INTO prfm_parfum_sezon (parfum_id, sezon_id) VALUES (?, ?) ON CONFLICT DO NOTHING;"; // if a season is already mapped it throws a pk err
+        try (PreparedStatement psLink=conn.prepareStatement(sql))
         {
                 psLink.setInt(1, perfumeId);
                 psLink.setInt(2, seasonId);
@@ -379,7 +379,8 @@ public class PerfumeRepository
 
     private int getNextId(String tableName, String columnName)
     {
-        String sql = "SELECT NVL(MAX(" + columnName + "), 0) + 1 FROM " + tableName; // table and column names don't work via '?'
+//        String sql = "SELECT NVL(MAX(" + columnName + "), 0) + 1 FROM " + tableName; // table and column names don't work via '?' // ORACLE
+        String sql = "SELECT COALESCE(MAX(" + columnName + "), 0) + 1 FROM " + tableName;
         try (PreparedStatement pstmt= dbConnection.getConnection().prepareStatement(sql); ResultSet rs = pstmt.executeQuery())
         {
             if (rs.next())

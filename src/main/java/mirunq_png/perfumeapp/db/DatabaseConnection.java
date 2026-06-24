@@ -13,16 +13,19 @@ public class DatabaseConnection
 
     private DatabaseConnection() throws SQLException, ClassNotFoundException
     {
-        Class.forName("oracle.jdbc.driver.OracleDriver"); // safety measure for tomcat
+//        Class.forName("oracle.jdbc.driver.OracleDriver"); // safety measure for tomcat // ORACLE
+        Class.forName("org.postgresql.Driver");
         String url = ConfigLoader.getProperty("db.url");
         String user = ConfigLoader.getProperty("db.user");
         String pass = ConfigLoader.getProperty("db.password");
         try
         {
             this.connection = DriverManager.getConnection(url, user, pass);
+            System.out.println("Debug: connected to db");
         } catch (SQLException e)
         {
-            throw new SQLException("Oracle connection could not be established. Did you set up the config correctly?", e); // fatal
+//            throw new SQLException("Oracle connection could not be established. Did you set up the config correctly?", e); // fatal // ORACLE
+            throw new SQLException("PostgreSQL connection could not be established.");
         }
     }
 
@@ -56,10 +59,12 @@ public class DatabaseConnection
             if (connection==null || connection.isClosed()) // nothing to close
                 return;
             connection.close();
-            System.err.println("Oracle Database connection safely closed.");
+//            System.err.println("Oracle Database connection safely closed.");
+            System.err.println("Connection closed.");
         } catch (SQLException e)
         {
-            System.err.println("Error while closing the database connection.");
+//            System.err.println("Error while closing the database connection.");
+            System.err.println("Error closing connection.");
             e.printStackTrace();
         }
     }

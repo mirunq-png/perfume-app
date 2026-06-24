@@ -38,6 +38,8 @@ gen/
 src/main/resources/config.properties
 src/main/resources/db.sql
 src/main/resources/inserts.sql
+src/main/resources/dbPG.sql
+src/main/resources/insertsPG.sql
 
 # Others
 .smarttomcat
