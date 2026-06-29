@@ -189,6 +189,11 @@ body {
     background-color: #FFC3DB;
     border: 1px solid #28a745;
 }
+.form-message.info {
+color: #BD6591;
+background-color: #FFC3DB;
+border: 1px solid #28a745;
+}
 .welcome-image {
     display: block;
     width: 500px;

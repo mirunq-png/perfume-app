@@ -144,6 +144,7 @@ public class PerfumeApiServlet extends HttpServlet
                 else type=Type.EDP;
                 //float rating=(Float)perfumeData.get("rating"); // float cast can crash bc of jackson
                 float rating=perfumeData.get("rating") != null ? ((Number) perfumeData.get("rating")).floatValue() : 0;
+
                 int brandId=pr.getBrandIdByName(brand);
                 if (brandId==-1) // brand doesn't already exist, add it
                     brandId=pr.addBrand(brand);
@@ -210,7 +211,8 @@ public class PerfumeApiServlet extends HttpServlet
             Type type=null;
             if (typeStr!=null&&!typeStr.isBlank())
                 type=Type.valueOf(typeStr.toUpperCase());
-            float rating=(float)perfumeData.get("rating");
+            //float rating=(float)perfumeData.get("rating"); //jackson doesn't like this
+            float rating=perfumeData.get("rating") != null ? ((Number) perfumeData.get("rating")).floatValue() : 0;
             int brandId=pr.getBrandIdByName(brand);
             if (brandId==-1) // is the brand new?
                 brandId=pr.addBrand(brand);
@@ -256,5 +258,32 @@ public class PerfumeApiServlet extends HttpServlet
                 for (String n : splitNotes)
                     notes.add(new Note(n.trim(), layer));
         }
+    }
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        String idParam=request.getParameter("id");
+        if (idParam==null)
+        {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.print("{\"error\": \"Missing id parameter.\"}");
+            out.flush();
+            return;
+        }
+        try
+        {
+            int id=Integer.parseInt(idParam);
+            pr.disablePerfume(id);
+            response.setStatus(HttpServletResponse.SC_OK);
+            out.print("{\"message\": \"Perfume deleted successfully!\"}");
+        } catch (Exception e)
+        {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("{\"error\": \"Server error: " + e.getMessage() + "\"}");
+        }
+        out.flush();
     }
 }

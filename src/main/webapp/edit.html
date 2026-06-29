@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Perfume</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="form-container">
+    <h1>Edit Perfume</h1>
+    <form id="perfumeForm">
+        <div class="form-group">
+            <label for="name">Perfume name*</label>
+            <input type="text" id="name">
+        </div>
+
+        <div class="form-group">
+            <label for="existingBrand">Brand name*</label>
+            <select id="existingBrand" onchange="checkBrandSelection()">
+                <option value="">Loading...</option>
+                <option value="NEW">[+] Add a new brand...</option>
+            </select>
+        </div>
+
+        <div class="form-group hidden" id="newBrandContainer">
+            <label for="newBrand">New brand name*</label>
+            <input type="text" id="newBrand">
+        </div>
+
+        <div class="form-group">
+            <label for="ml">Amount (ml)*</label>
+            <select id="ml">
+                <option value="2">2 ml</option>
+                <option value="5">5 ml</option>
+                <option value="10">10 ml</option>
+                <option value="30">30 ml</option>
+                <option value="50">50 ml</option>
+                <option value="80">80 ml</option>
+                <option value="90">90 ml</option>
+                <option value="100">100 ml</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="type">Type*</label>
+            <select id="type">
+                <option value="EDP">Eau de parfum</option>
+                <option value="ETP">Eau de toilette</option>
+                <option value="BM">Body mist</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="topNotes">Top notes (comma separated)</label>
+            <input type="text" id="topNotes" placeholder="e.g. strawberry, lemon">
+        </div>
+
+        <div class="form-group">
+            <label for="heartNotes">Heart notes (comma separated)</label>
+            <input type="text" id="heartNotes" placeholder="e.g. orange blossom">
+        </div>
+
+        <div class="form-group">
+            <label for="baseNotes">Base notes (comma separated)*</label>
+            <input type="text" id="baseNotes" placeholder="e.g. marshmallow, musk">
+        </div>
+
+        <div class="form-group">
+            <label>Seasons*</label>
+            <div id="seasons-container">
+                <input type="checkbox" value="WINTER"> Winter
+                <input type="checkbox" value="SPRING"> Spring
+                <input type="checkbox" value="SUMMER"> Summer
+                <input type="checkbox" value="FALL"> Fall
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="rating">Rating*</label>
+            <input type="text" id="rating" placeholder="e.g. 9.5">
+        </div>
+        <button type="submit">Save changes</button>
+    </form>
+</div>
+<br>
+<div style="display: flex; flex-direction: row; gap: 12px; margin-top: 20px;">
+    <button id="deleteBtn">Delete perfume</button>
+    <button onclick="window.location.href='collection.html'">Back to your collection</button>
+    <button onclick="window.location.href='index.html'">Back to main menu</button>
+</div>
+<script src="js/utility.js"></script>
+<script src="js/edit.js"></script>
+</body>
+</html>
