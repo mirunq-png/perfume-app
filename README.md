@@ -84,7 +84,7 @@ You will need a `resources` folder in the root directory. Inside, create a `conf
   Copy the repo URL: `https://github.com/mirunq-png/perfume-app` and clone it in IntelliJ. Make sure you switch to the `phase3` branch.
   
   ### 3. Configuration
-  You will need a `resources` folder in the root directory. Inside, create a `config` [file](https://gist.github.com/mirunq-png/ee19936e8fac68b560fea0333b6b2c9f) containing your PostgreSQL Database authentication details.
+  You will need a `resources` folder in `src/main`. Inside, create a `config` [file](https://gist.github.com/mirunq-png/ee19936e8fac68b560fea0333b6b2c9f) containing your PostgreSQL Database authentication details.
   
   You will need to set up the Smart Tomcat plugin. After having downloaded [Apache Tomcat 9.0](https://tomcat.apache.org/download-90.cgi):
   - CTRL+Alt+S -> Plugins -> "Smart Tomcat" -> Install
