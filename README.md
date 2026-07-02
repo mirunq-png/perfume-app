@@ -71,7 +71,7 @@ You will need a `resources` folder in the root directory. Inside, create a `conf
   ## Prerequisites
 
   To run this application locally, you will need to set up your environment and database connection. This includes:
-  * IntelliJ Idea (I'm using version 2025.3.3)
+  * IntelliJ Idea (I'm using version 2025.3.3) and JDK21
   * PostgreSQL (I'm using version 18.4.2)
   * Git
 
@@ -87,10 +87,11 @@ You will need a `resources` folder in the root directory. Inside, create a `conf
   You will need a `resources` folder in `src/main`. Inside, create a `config.properties` [file](https://gist.github.com/mirunq-png/ee19936e8fac68b560fea0333b6b2c9f) containing your PostgreSQL Database authentication details.
   
   You will need to set up the Smart Tomcat plugin. After having downloaded [Apache Tomcat 9.0](https://tomcat.apache.org/download-90.cgi):
-  - CTRL+Alt+S -> Plugins -> "Smart Tomcat" -> Install
-  - CTRL+Shift+A -> "Edit configuration" -> fill in the config fields
+  - CTRL+Alt+S -> Plugins -> "smarttomcat" -> Install
+  - CTRL+Shift+A -> "Edit configuration" -> Add new run configuration -> Smart Tomcat -> fill in the config fields
   <img width="580" height="429" alt="image" src="https://github.com/user-attachments/assets/fefd0f3b-4b25-469f-b8f4-9fb1e8dd8eec" />
-
+  
+  Make sure the deployment directory is the `webapp` folder and that you add a context path.
 
   ## What's new
   * Adding/modifying/deleting perfumes from UI
