@@ -111,6 +111,7 @@ document.getElementById("perfumeForm").addEventListener("submit", async function
     //grabbing the data
     const payload =
     {
+        id: parseInt(perfumeId),
         brand,
         name,
         ml,
