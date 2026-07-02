@@ -1,7 +1,7 @@
 const params = new URLSearchParams(window.location.search);
 const perfumeId = params.get("id");
 
-async function loadBrands() {
+async function loadBrands(currentBrand) {
     const select = document.getElementById("existingBrand");
     try {
         const response = await fetch("api/brands");
@@ -10,11 +10,13 @@ async function loadBrands() {
         select.innerHTML = `<option value="">...</option>`;
         brands.forEach(brand => {
             const option = document.createElement("option");
-            option.value = brand;
+            option.value = formatText(brand);
             option.textContent = formatText(brand);
+            if (formatText(brand) === currentBrand)
+                option.selected = true;
             select.appendChild(option);
         });
-        select.appendChild(new Option("+ Add a new brand...", "NEW"));
+        select.appendChild(new Option("[+] Add a new brand...", "NEW"));
     } catch (e) {
         select.innerHTML = `<option value="">-- Could not load brands --</option>`;
         console.error("Failed to load brands:", e);
@@ -56,7 +58,7 @@ async function loadPerfume()
         document.getElementById("baseNotes").value=formatText(baseNotes);
         const seasonCheckboxes = document.querySelectorAll("#seasons-container input[type='checkbox']");
         seasonCheckboxes.forEach(cb =>{cb.checked = p.seasons.includes(cb.value);});
-        await loadBrands(p.brand);
+        await loadBrands(formatText(p.brand));
     } catch (e)
     {
         showMessage("Could not load perfume data.", "error");
