@@ -28,16 +28,16 @@ document.getElementById("perfumeForm").addEventListener("submit", async function
 {
     e.preventDefault();
 
-    const name       = document.getElementById("name").value.trim();
+    const name = document.getElementById("name").value.trim();
     const brandSelect = document.getElementById("existingBrand").value;
     const brand = brandSelect === "NEW"? document.getElementById("newBrand").value.trim(): brandSelect;
-    const ml         = parseInt(document.getElementById("ml").value);
-    const type       = document.getElementById("type").value;
-    const topNotes   = document.getElementById("topNotes").value.trim();
+    const ml = parseInt(document.getElementById("ml").value);
+    const type = document.getElementById("type").value;
+    const topNotes = document.getElementById("topNotes").value.trim();
     const heartNotes = document.getElementById("heartNotes").value.trim();
-    const baseNotes  = document.getElementById("baseNotes").value.trim();
-    const ratingRaw  = document.getElementById("rating").value.trim();
-    const rating     = ratingRaw !== "" ? parseFloat(ratingRaw) : null;
+    const baseNotes = document.getElementById("baseNotes").value.trim();
+    const ratingRaw = document.getElementById("rating").value.trim();
+    const rating = ratingRaw !== "" ? parseFloat(ratingRaw) : null;
     const seasonCheckboxes = document.querySelectorAll("#seasons-container input[type='checkbox']:checked");
     const seasons = Array.from(seasonCheckboxes).map(cb => cb.value).join(", ");
     //validation

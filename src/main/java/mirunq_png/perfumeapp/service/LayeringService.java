@@ -3,10 +3,11 @@ package mirunq_png.perfumeapp.service;
 import mirunq_png.perfumeapp.model.NoteLayer;
 import mirunq_png.perfumeapp.model.Perfume;
 import mirunq_png.perfumeapp.model.Type;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Service
 public class LayeringService
 {
     public List<Perfume> getRecommendations(Perfume base, List<Perfume> all, int limit)
@@ -14,7 +15,7 @@ public class LayeringService
         List<Perfume> candidates = new ArrayList<>();
         List<Perfume> topPicks = new ArrayList<>();
         for (Perfume p : all)
-            if (!p.getName().equalsIgnoreCase(base.getName()) || !p.getBrand().equalsIgnoreCase(base.getBrand()))
+            if (!p.getName().equalsIgnoreCase(base.getName()) || !p.getBrand().getName().equalsIgnoreCase(base.getBrand().getName()))
                 candidates.add(p);
         candidates.sort((p1, p2) -> Double.compare(calculateScore(base, p2), calculateScore(base, p1)));
         for (int i = 0; i < Math.min(limit, candidates.size()); i++)
@@ -176,8 +177,8 @@ public class LayeringService
     private long countSharedNotes(Perfume p1, Perfume p2)
     {
         return p1.getNotes().stream()
-                .map(n -> n.getName().toUpperCase())
-                .filter(name -> p2.getNotes().stream().anyMatch(n2 -> n2.getName().equalsIgnoreCase(name)))
+                .map(n -> n.getNote().getName().toUpperCase())
+                .filter(name -> p2.getNotes().stream().anyMatch(n2 -> n2.getNote().getName().equalsIgnoreCase(name)))
                 .count();
     }
     private long countByLayer(Perfume p, NoteLayer layer)

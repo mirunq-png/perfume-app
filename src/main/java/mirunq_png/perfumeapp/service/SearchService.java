@@ -1,14 +1,11 @@
 package mirunq_png.perfumeapp.service;
 
 import mirunq_png.perfumeapp.model.Perfume;
+import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+@Service
 public class SearchService
 {
     public List<Perfume> searchByNote(List<Perfume>all, String searchedNote)
@@ -20,7 +17,7 @@ public class SearchService
         {
             var notes=p.getNotes();
             for (var n:notes)
-                if (n.getName().matches("(?i).*\\b" + searchedNote + "\\b.*")) // ?i flag makes the whole expression case-insensitive; logic: .* - wild card, allows anything; \\b - word boundary
+                if (n.getNote().getName().matches("(?i).*\\b" + searchedNote + "\\b.*")) // ?i flag makes the whole expression case-insensitive; logic: .* - wild card, allows anything; \\b - word boundary
                 { // => 'vanilla' will work for both bourbon vanilla and vanilla absolute
                     results.add(p);
                     break;

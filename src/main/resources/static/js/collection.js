@@ -14,14 +14,14 @@ async function loadPerfumes()
         perfumes.forEach(p =>
         {
         console.log(p);
-            const topNotes = p.notes.filter(n => n.layer === 'TOP').map(n => n.name).join(', ') || '-'; // only grabs the notes marked as top
-            const heartNotes = p.notes.filter(n => n.layer === 'HEART').map(n => n.name).join(', ') || '-'; // similar
-            const baseNotes = p.notes.filter(n => n.layer === 'BASE').map(n => n.name).join(', ') || '-'; // similar
+            const topNotes = p.notes.filter(n => n.layer === 'TOP').map(n => n.note.name).join(', ') || '-'; // only grabs the notes marked as top
+            const heartNotes = p.notes.filter(n => n.layer === 'HEART').map(n => n.note.name).join(', ') || '-'; // similar
+            const baseNotes = p.notes.filter(n => n.layer === 'BASE').map(n => n.note.name).join(', ') || '-'; // similar
             const seasons=p.seasons&&p.seasons.length>0 ? p.seasons.join(', '):'-'; // handles the case if there are no seasons added
             const row = `
-                <tr id="row-${p.parfum_id}">
+                <tr id="row-${p.id}">
                     <td><input type="radio" name="perfume-select" onclick="handleSelect(this)"></td>
-                    <td>${formatText(p.brand)}</td>
+                    <td>${formatText(p.brand.name)}</td>
                     <td>${formatText(p.name)}</td>
                     <td>${p.ml} ml</td>
                     <td class="notes-column-container">

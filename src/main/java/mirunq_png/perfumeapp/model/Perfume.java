@@ -1,89 +1,115 @@
 package mirunq_png.perfumeapp.model;
 
-import java.sql.Connection;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Entity
+@Table(name="prfm_parfumuri")
 public class Perfume
 {
-    private final String brand;
-    private final String name;
-    private final int ml;
-    private List<Note> notes;
-    private final Set<Season> seasons;
-    private Type type;
-    private float rating; // [!!!]
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="parfum_id")
     private int id;
-    public Perfume()
+
+    @Column(name="nume_parfum", nullable=false)
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name="brand_id", nullable=false)
+    private Brand brand;
+
+    @Column(name="cantitate_ml")
+    private int ml;
+
+    @Column(name="tip_parfum")
+    @Enumerated(EnumType.STRING)
+    private Type type;
+
+    @Column(name="rating")
+    private float rating;
+
+    @Column(name="activ")
+    private int activ = 1;
+
+    @OneToMany(mappedBy="perfume", cascade=CascadeType.ALL, orphanRemoval=true)
+    private List<PerfumeNote> notes = new ArrayList<>();
+
+    @ElementCollection(targetClass=Season.class)
+    @CollectionTable(
+            name="prfm_parfum_sezon",
+            joinColumns=@JoinColumn(name="parfum_id"))
+    @Column(name="season")
+    @Enumerated(EnumType.STRING)
+    private Set<Season> seasons = new HashSet<>();
+
+    public Perfume() {}
+    public Perfume(String name, Brand brand, int ml, Type type)
     {
-        brand="Undefined";
-        name="N/A";
-        ml=0;
-        notes=new ArrayList<>();
-        seasons=new HashSet<>();
-        id=0;
+        this.name = name;
+        this.brand = brand;
+        this.ml = ml;
+        this.type = type;
     }
 
-    public Perfume(String brand, String name, int ml, Type type)
-    {
-        if(brand!=null&&!brand.isEmpty())
-            this.brand = brand;
-        else
-            this.brand="Undefined";
-        if (name!=null&&!name.isEmpty())
-            this.name=name;
-        else
-            this.name="N/A";
-        if (ml>0)
-            this.ml = ml;
-        else
-            this.ml=0;
-        notes = new ArrayList<>();
-        seasons=new HashSet<>();
-        this.type=type;
+    public Brand getBrand() {
+        return brand;
+    }
+    public void setBrand(Brand brand) {
+        this.brand = brand;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public int getMl() {
+        return ml;
+    }
+    public void setMl(int ml) {
+        this.ml = ml;
+    }
+    public List<PerfumeNote> getNotes() {
+        return notes;
+    }
+    public void setNotes(List<PerfumeNote> notes) {
+        this.notes = notes;
+    }
+    public Set<Season> getSeasons() {
+        return seasons;
+    }
+    public void setSeasons(Set<Season> seasons) {
+        this.seasons = seasons;
+    }
+    public Type getType() {
+        return type;
+    }
+    public void setType(Type type) {
+        this.type = type;
+    }
+    public float getRating() {
+        return rating;
+    }
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
+    public int getActiv() {
+        return activ;
+    }
+    public void setActiv(int activ) {
+        this.activ = activ;
     }
 
-    public Perfume(String brand, String name, int ml, List<Note> notes, Set<Season> seasons, Type type)
-    {
-        if(brand!=null&&!brand.isEmpty())
-            this.brand = brand;
-        else
-            this.brand="Undefined";
-        if (name!=null&&!name.isEmpty())
-            this.name=name;
-        else
-            this.name="N/A";
-        if (ml>0)
-            this.ml = ml;
-        else
-            this.ml=0;
-
-        if (notes!=null)
-            this.notes=new ArrayList<>(notes);
-        else
-            this.notes=new ArrayList<>();
-        if (seasons!=null)
-            this.seasons=new HashSet<>(seasons);
-        else
-            this.seasons=new HashSet<>();
-        this.type=type;
-    }
-    //add/set
-    public void addNote(Note note) {notes.add(note);}
-    public void addSeason(Season sz) {seasons.add(sz);}
-    public void addRating(float r) {if (r>=0&&r<=10) rating=r; else rating=10;}
-    public void addId(int id) {this.id=id;}
-    //get
-    public String getName() { return name; }
-    public String getBrand() { return brand; }
-    public int getMl() {return ml;}
-    public List<Note> getNotes() { return notes; }
-    public Set<Season> getSeasons() {return seasons;}
-    public float getRating() { return rating; }
-    public Type getType() { return type; }
-    public int getId() { return id; }
     @Override
     public String toString()
     {
@@ -96,7 +122,7 @@ public class Perfume
         if (notes.isEmpty())
             sb.append("  • (No notes assigned)\n");
         else
-            for (Note note : notes)
+            for (PerfumeNote note : notes)
                 sb.append("  • ").append(note).append("\n");
         sb.append("Seasons:\n");
         if (seasons.isEmpty())

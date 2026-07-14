@@ -40,6 +40,9 @@ src/main/resources/db.sql
 src/main/resources/inserts.sql
 src/main/resources/dbPG.sql
 src/main/resources/insertsPG.sql
+src/main/resources/application.properties
+src/main/resources/cleanDB.sql
+src/main/resources/cleanInserts.sql
 
 # Others
 .smarttomcat

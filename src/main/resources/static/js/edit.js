@@ -50,15 +50,15 @@ async function loadPerfume()
         for (let opt of typeSelect.options)
             if (opt.value === p.type)
                 opt.selected = true;
-        const topNotes=p.notes.filter(n=> n.layer === "TOP").map(n => n.name).join(", ");
-        const heartNotes=p.notes.filter(n => n.layer === "HEART").map(n => n.name).join(", ");
-        const baseNotes=p.notes.filter(n => n.layer === "BASE").map(n => n.name).join(", ");
+        const topNotes=p.notes.filter(n=> n.layer === "TOP").map(n => n.note.name).join(", ");
+        const heartNotes=p.notes.filter(n => n.layer === "HEART").map(n => n.note.name).join(", ");
+        const baseNotes=p.notes.filter(n => n.layer === "BASE").map(n => n.note.name).join(", ");
         document.getElementById("topNotes").value=formatText(topNotes);
         document.getElementById("heartNotes").value=formatText(heartNotes);
         document.getElementById("baseNotes").value=formatText(baseNotes);
         const seasonCheckboxes = document.querySelectorAll("#seasons-container input[type='checkbox']");
         seasonCheckboxes.forEach(cb =>{cb.checked = p.seasons.includes(cb.value);});
-        await loadBrands(formatText(p.brand));
+        await loadBrands(formatText(p.brand.name));
     } catch (e)
     {
         showMessage("Could not load perfume data.", "error");
@@ -70,16 +70,16 @@ async function loadPerfume()
 document.getElementById("perfumeForm").addEventListener("submit", async function (e)
 {
     e.preventDefault();
-    const name = document.getElementById("name").value.trim();
-    const brandSelect = document.getElementById("existingBrand").value;
-    const brand = brandSelect === "NEW" ? document.getElementById("newBrand").value.trim() : brandSelect;
-    const ml = parseInt(document.getElementById("ml").value);
-    const type = document.getElementById("type").value;
-    const topNotes= document.getElementById("topNotes").value.trim();
-    const heartNotes= document.getElementById("heartNotes").value.trim();
-    const baseNotes= document.getElementById("baseNotes").value.trim();
-    const ratingRaw= document.getElementById("rating").value.trim();
-    const rating = ratingRaw !== "" ? parseFloat(ratingRaw) : null;
+    const name=document.getElementById("name").value.trim();
+    const brandSelect=document.getElementById("existingBrand").value;
+    const brand=brandSelect === "NEW" ? document.getElementById("newBrand").value.trim():brandSelect;
+    const ml=parseInt(document.getElementById("ml").value);
+    const type=document.getElementById("type").value;
+    const topNotes=document.getElementById("topNotes").value.trim();
+    const heartNotes=document.getElementById("heartNotes").value.trim();
+    const baseNotes=document.getElementById("baseNotes").value.trim();
+    const ratingRaw=document.getElementById("rating").value.trim();
+    const rating=ratingRaw !== "" ? parseFloat(ratingRaw) : null;
     const seasonCheckboxes = document.querySelectorAll("#seasons-container input[type='checkbox']:checked");
     const seasons= Array.from(seasonCheckboxes).map(cb => cb.value).join(", ");
     //validation
@@ -147,7 +147,7 @@ document.getElementById("perfumeForm").addEventListener("submit", async function
 //delete
 document.getElementById("deleteBtn").addEventListener("click", async function ()
 {
-    if (!confirm("Are you sure you want to delete this perfume? This cannot be undone."))
+    if (!confirm("Are you sure you want to delete this perfume?"))
         return;
     try
     {

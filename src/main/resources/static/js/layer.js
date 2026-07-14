@@ -51,7 +51,7 @@ async function generateRecommendations()
         {
             const p = item.perfume;
             const explanation = item.explanation;
-            const brand = formatText(p.brand);
+            const brand = formatText(p.brand.name);
             const name = formatText(p.name);
             const score = item.score != null ? `${item.score}% match` : 'N/A';
             htmlOutput += `

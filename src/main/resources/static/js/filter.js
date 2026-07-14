@@ -10,7 +10,7 @@ async function filterByNote()
         }
         try
         {
-            const response = await fetch(`api/perfume?note=${encodeURIComponent(noteInput.trim())}`); // encodeURIComponent in case of illegal characters e.g. &
+            const response = await fetch(`api/perfume?note=${encodeURIComponent(noteInput.trim())}`); // encodeURIComponent in case of illegal characters like &
             if (!response.ok)
             throw new Error("Failed to fetch from API");
 
@@ -27,7 +27,7 @@ async function filterByNote()
 
             perfumes.forEach((p, index) =>
             {
-                const brand = formatText(p.brand);
+                const brand = formatText(p.brand.name);
                 const name = formatText(p.name);
                 htmlOutput += `
                     <li class="match-card">
@@ -36,12 +36,12 @@ async function filterByNote()
                         </div>
                         <div>
                             <span style="font-weight: bold; color: #E0588D;">Notes:</span>
-                            ${p.notes.map(n => formatText(n.name)).join(', ')}
+                            ${p.notes.map(n => formatText(n.note.name)).join(', ')}
                         </div>
                     </li>
                 `;
             });
-            htmlOutput += `</ul>`; // closing container
+            htmlOutput += `</ul>`;
             resultsContainer.innerHTML = htmlOutput;
 
         } catch (error)
