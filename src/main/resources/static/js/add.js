@@ -130,7 +130,153 @@ function showMessage(text, type)
 function resetPageContents()
 {
     document.getElementById("perfumeForm").reset();
+    document.getElementById("scraperUrl").value = "";
     document.getElementById("newBrandContainer").classList.add("hidden");
     loadBrands();
 }
+let loadingInterval = null;
+async function fetchFragranticaData()
+{
+    const urlInput = document.getElementById('scraperUrl');
+    const status = document.getElementById('autofillStatus');
+    const btn = document.getElementById('btnFetch');
+    const url = urlInput.value.trim();
+    if (!url)
+    {
+        status.textContent = 'Please paste a Fragrantica URL first.';
+        return;
+    }
+    btn.disabled = true;
+    startLoadingAnimation(status);
+    try
+    {
+        const response = await fetch(`api/import/fragrantica?url=${encodeURIComponent(url)}`);
+        if (!response.ok)
+            throw new Error(`Server responded with ${response.status}`);
+        const data = await response.json();
+        const imported = [];
+        const missing = [];
+        const reviewIds = [];
+
+        if (data.perfumeName)
+        {
+            document.getElementById('name').value = data.perfumeName;
+            imported.push('name');
+        }
+        else
+            missing.push('name');
+
+        if (data.brandName)
+        {
+            const brandSelect = document.getElementById('existingBrand');
+            const match = Array.from(brandSelect.options)
+                .find(opt => opt.value.toLowerCase() === data.brandName.toLowerCase());
+            if (match)
+                brandSelect.value = match.value;
+            else
+            {
+                brandSelect.value = 'NEW';
+                document.getElementById('newBrand').value = data.brandName;
+            }
+            checkBrandSelection();
+            imported.push('brand');
+        }
+        else missing.push('brand');
+
+        if (data.type)
+        {
+            const typeSelect = document.getElementById('type');
+            const match = Array.from(typeSelect.options)
+                .find(opt => opt.value.toLowerCase() === data.type.toLowerCase());
+            if (match)
+            {
+                typeSelect.value = match.value;
+                imported.push('type');
+            } else
+                missing.push('type (unrecognized value, please select manually)');
+        }
+        else
+            missing.push('type');
+
+        if (data.rating != null && !isNaN(data.rating))
+        {
+            document.getElementById('rating').value = data.rating;
+            imported.push('rating');
+        }
+        else
+            missing.push('rating');
+
+        if (data.topNotes)
+        {
+            document.getElementById('topNotes').value = data.topNotes;
+            imported.push('top notes');
+        }
+        else
+            missing.push('top notes');
+
+        if (data.heartNotes)
+        {
+            document.getElementById('heartNotes').value = data.heartNotes;
+            imported.push('heart notes');
+        }
+        else
+            missing.push('heart notes');
+
+        if (data.baseNotes)
+        {
+            document.getElementById('baseNotes').value = data.baseNotes;
+            imported.push('base notes');
+        }
+        else
+            missing.push('base notes');
+
+        if (Array.isArray(data.seasons) && data.seasons.length > 0)
+        {
+            const checkboxes = document.querySelectorAll('#seasons-container input[type="checkbox"]');
+            checkboxes.forEach(cb =>
+            {
+                cb.checked = data.seasons.some(s => s.toUpperCase() === cb.value.toUpperCase());
+            });
+            imported.push('seasons');
+        }
+        else
+            missing.push('seasons');
+        missing.push('ml'); // this data isn't grabbed from fragrantica
+
+        let summary = '';
+        if (imported.length > 0)
+        {
+            summary += `Imported: ${imported.join(', ')}. `;
+            summary += `\nPlease check: ${missing.join(', ')}.`;
+        }
+        showMessage(summary || 'Nothing could be imported from that URL.', missing.length > 0 ? 'info' : 'success');
+    } catch (e)
+    {
+        showMessage('Could not load data from that URL.', 'error');
+        console.error('Autofill failed:', e);
+    } finally
+    {
+        stopLoadingAnimation();
+        btn.disabled = false;
+    }
+
+    function startLoadingAnimation(el)
+    {
+        let dots = 0;
+        el.textContent = 'Please wait';
+        loadingInterval = setInterval(() =>
+        {
+            dots = (dots + 1) % 4; // cycles 0,1,2,3
+            el.textContent = 'Please wait' + '.'.repeat(dots);
+        }, 400);
+    }
+
+    function stopLoadingAnimation()
+    {
+        clearInterval(loadingInterval);
+        loadingInterval = null;
+        document.getElementById('autofillStatus').textContent = '';
+    }
+}
+
 loadBrands();

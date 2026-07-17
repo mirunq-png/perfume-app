@@ -8,6 +8,22 @@
 <body>
 <div class="form-container">
     <h1>Add a New Perfume</h1>
+
+    <details class="form-container">
+        <summary class="autofill-summary">
+            Optional: Autofill from Fragrantica
+        </summary>
+        <br>
+        <div class="autofill-container">
+            <div class="autofill-group">
+                <input type="url" id="scraperUrl" placeholder="https://www.fragrantica.com/perfume/..." />
+                <button type="button" id="btnFetch" onclick="fetchFragranticaData()">Load</button>
+            </div>
+            <span id="autofillStatus" class="status-text"></span>
+        </div>
+    </details>
+    <br>
+
     <form id="perfumeForm">
         <div class="form-group">
             <label for="name">Perfume name*</label>
