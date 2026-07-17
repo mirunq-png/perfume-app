@@ -12,7 +12,8 @@ import java.util.Optional;
 @Repository
 public interface PerfumeRepository extends JpaRepository<Perfume,Integer>
 {
-    List<Perfume> findByActiv(int activ); // select * from prfm_parfumuri where activ=?
+    @Query("select p from Perfume p join p.brand b where p.activ = :activ order by b.name asc, p.name asc")
+    List<Perfume> findByActiv(@Param("activ") int activ); // select * from prfm_parfumuri where activ=?, sorted by brand then name
     Optional<Perfume> findByIdAndActiv(int id, int activ); // <=> getPerfumeById with check for activ=1
     Optional<Perfume> findByNameIgnoreCaseAndBrand_NameIgnoreCase(String name, String brandName);
     @Query("select p from Perfume p join p.notes pn where upper(pn.note.name) like upper(concat('%',:noteName,'%')) and p.activ=1")
