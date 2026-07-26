@@ -1,0 +1,373 @@
+.form-page-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.form-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  gap: 20px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form-page-header h1 {
+  color: var(--accent);
+  font-size: 2em;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.back-btn {
+  padding: 12px 20px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  background-color: var(--accent-hover);
+}
+
+.form-page-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.perfume-form {
+  background-color: var(--bg-secondary);
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.fragrantica-toggle {
+  margin-bottom: 20px;
+}
+
+.toggle-btn {
+  padding: 10px 16px;
+  background-color: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95em;
+  transition: all 0.3s ease;
+  font-family: 'Playfair Display', serif;
+}
+
+.toggle-btn:hover {
+  background-color: var(--accent);
+  color: white;
+}
+
+.fragrantica-section {
+  background-color: var(--bg-primary);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.fragrantica-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.fragrantica-input-group input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.95em;
+  font-family: 'Playfair Display', serif;
+  transition: border-color 0.3s ease;
+}
+
+.fragrantica-input-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(224, 88, 141, 0.2);
+}
+
+.scrape-btn {
+  padding: 10px 20px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95em;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.scrape-btn:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.scrape-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-dots {
+  display: inline-flex;
+  align-items: center;
+}
+
+.loading-dots span {
+  animation: loadingDots 1.4s infinite both;
+  margin-left: 1px;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loadingDots {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.message {
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.message.error {
+  background-color: #fff0f6;
+  color: #d63384;
+  border: 1px solid #d63384;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.info {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.message-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.message-section:last-child {
+  margin-bottom: 0;
+}
+
+.message-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.message-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.message-tag {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.message.success .message-tag {
+  background-color: rgba(21, 87, 36, 0.1);
+  border-color: rgba(21, 87, 36, 0.2);
+}
+
+.message.info .message-tag {
+  background-color: rgba(133, 100, 4, 0.1);
+  border-color: rgba(133, 100, 4, 0.2);
+}
+
+.message-icon {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.message-icon.warning {
+  color: #ff9800;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 0.95em;
+}
+
+.warning-indicator {
+  color: #ff9800;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: help;
+}
+
+.form-group input.warning-border,
+.form-group select.warning-border {
+  border-color: #ff9800;
+  box-shadow: 0 0 5px rgba(255, 152, 0, 0.2);
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.95em;
+  font-family: 'Playfair Display', serif;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(224, 88, 141, 0.2);
+}
+
+.checkbox-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+}
+
+.checkbox-label input {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.05em;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+  .form-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-page-header h1 {
+    font-size: 1.5em;
+  }
+
+  .back-btn {
+    width: 100%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .perfume-form {
+    padding: 20px;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

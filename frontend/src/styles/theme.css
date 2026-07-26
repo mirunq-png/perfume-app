@@ -1,0 +1,67 @@
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9f9f9;
+  --text-primary: #000000;
+  --text-secondary: #444444;
+  --border: #ddd;
+  --accent: #E0588D;
+  --accent-hover: #c9467a;
+  --button-bg: #ffffff;
+  --button-border: #999;
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --border: #444;
+  --accent: #E0588D;
+  --accent-hover: #ff6ba3;
+  --button-bg: #2d2d2d;
+  --button-border: #555;
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  font-family: 'Playfair Display', serif !important;
+}
+
+html, body {
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body, html {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Playfair Display', serif !important;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif !important;
+}
+
+p, a, button, input, select, textarea {
+  font-family: 'Playfair Display', serif !important;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
