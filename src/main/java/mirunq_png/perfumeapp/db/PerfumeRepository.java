@@ -1,6 +1,7 @@
 package mirunq_png.perfumeapp.db;
 
 import mirunq_png.perfumeapp.model.Perfume;
+import mirunq_png.perfumeapp.model.Season;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,7 @@ public interface PerfumeRepository extends JpaRepository<Perfume,Integer>
     Optional<Perfume> findByNameIgnoreCaseAndBrand_NameIgnoreCase(String name, String brandName);
     @Query("select p from Perfume p join p.notes pn where upper(pn.note.name) like upper(concat('%',:noteName,'%')) and p.activ=1")
     List<Perfume> searchByNote(@Param("noteName") String noteName);
+
+    @Query("select p from Perfume p join p.seasons s where s = :season and p.activ=1")
+    List<Perfume> searchBySeason(@Param("season") Season season);
 }

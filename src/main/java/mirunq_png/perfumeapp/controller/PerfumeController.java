@@ -33,6 +33,7 @@ public class PerfumeController
             @RequestParam(required=false) Integer id,
             @RequestParam(required=false) Integer fetch,
             @RequestParam(required=false) String note,
+            @RequestParam(required=false) String season,
             @RequestParam(required=false, defaultValue="3") int limit)
     {
         if (fetch != null) // EDITING, preloads fields
@@ -66,6 +67,15 @@ public class PerfumeController
         else if (note != null) // NOTE SEARCHING
         {
             return ResponseEntity.ok(perfumeRepository.searchByNote(note));
+        }
+        else if (season != null) // SEASON SEARCHING
+        {
+            try {
+                Season s = Season.valueOf(season.trim().toUpperCase());
+                return ResponseEntity.ok(perfumeRepository.searchBySeason(s));
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid season."));
+            }
         }
         else // LOADS ALL PERFUMES
         {

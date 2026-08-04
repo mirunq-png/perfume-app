@@ -160,19 +160,21 @@ public class ScraperService
         List<String> selectedSeasons = new ArrayList<>();
         try
         {
+            page.evaluate("window.scrollBy(0, 1000);"); // scrolls down to mitigate lazy loading
+            page.waitForSelector("div[index='0']", new Page.WaitForSelectorOptions().setTimeout(1500));
             String[] seasons = {"Winter", "Spring", "Summer", "Fall"};
             int[] votes = new int[4];
             int maxVotes = 0;
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++) // 0,1,2,3: winter,spring,summer,fall
             {
                 try
                 {
                     Locator voteSpan = page.locator("div[index='" + i + "'] span.tabular-nums").first();
                     if (voteSpan.count() > 0)
                     {
-                        String voteText = voteSpan.textContent().trim();
-                        votes[i] = Integer.parseInt(voteText);
+                        String voteText = voteSpan.innerText().trim();
+                        votes[i] = parseFragranticaVoteCount(voteText);
                         if (votes[i] > maxVotes)
                             maxVotes = votes[i];
                     }
@@ -181,11 +183,12 @@ public class ScraperService
                     votes[i] = 0;
                 }
             }
-
             double threshold = maxVotes * 0.50;
             for (int i = 0; i < 4; i++)
+            {
                 if (votes[i] >= threshold && votes[i] >= 10) // if votes for a season >50%, add it (also minimum of 10 votes)
                     selectedSeasons.add(seasons[i]);
+            }
         } catch (Exception e)
         {
             // fallback
@@ -210,6 +213,7 @@ public class ScraperService
             return 0;
         }
     }
+
     private String cleanNoteString(String rawNotes)
     {
         if (rawNotes == null)
