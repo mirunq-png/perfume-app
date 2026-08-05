@@ -43,6 +43,7 @@ src/main/resources/insertsPG.sql
 src/main/resources/application.properties
 src/main/resources/cleanDB.sql
 src/main/resources/cleanInserts.sql
+src/main/resources/cleanDB_addition.sql
 
 # Others
 .smarttomcat
