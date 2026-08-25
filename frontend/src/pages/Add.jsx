@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PerfumeForm from '../components/PerfumeForm';
+import { api } from '../utils/api';
 import '../styles/AddEdit.css';
 
 export default function Add() {
@@ -11,12 +12,7 @@ export default function Add() {
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/perfume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
+      const response = await api.post('/api/perfume', formData);
       if (!response.ok) throw new Error('Failed to save perfume');
       navigate('/collection');
     } catch (err) {
@@ -36,13 +32,10 @@ export default function Add() {
       transition={{ duration: 0.3 }}
     >
       <div className="form-page-header">
-        <button className="back-btn" onClick={() => navigate('/collection')}>
-          ← Back
-        </button>
+        <button className="back-btn" onClick={() => navigate('/collection')}>← Back</button>
         <h1>Add a new perfume</h1>
         <div style={{ width: '60px' }}></div>
       </div>
-
       <div className="form-page-content">
         <PerfumeForm onSubmit={handleSubmit} loading={loading} />
       </div>

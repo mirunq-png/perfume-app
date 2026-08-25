@@ -1,0 +1,108 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 20px;
+}
+
+.login-card {
+  background: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(224, 88, 141, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-card h1 {
+  color: var(--accent);
+  font-size: 2.2em;
+  margin: 0;
+}
+
+.login-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  margin: 0 0 16px 0;
+}
+
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-group label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.login-group input {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary);
+  font-size: 0.95em;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-group input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(224, 88, 141, 0.2);
+}
+
+.login-error {
+  background-color: #fff0f6;
+  color: #d63384;
+  border: 1px solid #d63384;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.login-btn {
+  margin-top: 10px;
+  padding: 12px 20px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(224, 88, 141, 0.3);
+}
+
+.login-btn:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(224, 88, 141, 0.4);
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

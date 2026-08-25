@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { formatText } from '../utils/formatText';
 import '../styles/AddEdit.css';
+import { api } from '../utils/api';
 
-export default function PerfumeForm({ onSubmit, loading, initialData = null }) {
+export default function PerfumeForm({ onSubmit, loading, initialData = null, onDelete }) {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     brand: initialData?.brand?.name || '',
@@ -69,7 +70,8 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null }) {
 
   async function loadBrands() {
     try {
-      const response = await fetch('/api/brands');
+      //const response = await fetch('/api/brands');
+      const response=await api.get('/api/brands');
       if (!response.ok) throw new Error('Failed to load brands');
       const data = await response.json();
       setBrands(data);
@@ -87,8 +89,8 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null }) {
     setScrapingLoading(true);
     setMissingFields([]);
     try {
-      const response = await fetch(`/api/import/fragrantica?url=${encodeURIComponent(formData.fragranticaUrl)}`);
-
+      //const response = await fetch(`/api/import/fragrantica?url=${encodeURIComponent(formData.fragranticaUrl)}`);
+      const response=await api.get(`/api/import/fragrantica?url=${encodeURIComponent(formData.fragranticaUrl)}`);
       if (!response.ok) throw new Error(`Server responded with ${response.status}`);
       const scrapedData = await response.json();
 
@@ -513,6 +515,12 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null }) {
       <button type="submit" className="submit-btn" disabled={loading}>
         {loading ? 'Saving...' : 'Save perfume!'}
       </button>
+
+      {onDelete && (
+        <button type="button" className="delete-btn" onClick={onDelete}>
+          Delete perfume
+        </button>
+      )}
     </motion.form>
   );
 }

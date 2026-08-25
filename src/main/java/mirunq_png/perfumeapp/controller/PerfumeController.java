@@ -4,10 +4,12 @@ import jakarta.transaction.Transactional;
 import mirunq_png.perfumeapp.db.BrandRepository;
 import mirunq_png.perfumeapp.db.NoteRepository;
 import mirunq_png.perfumeapp.db.PerfumeRepository;
+import mirunq_png.perfumeapp.db.UserRepository;
 import mirunq_png.perfumeapp.model.*;
 import mirunq_png.perfumeapp.service.LayeringService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -19,12 +21,14 @@ public class PerfumeController
     private final PerfumeRepository perfumeRepository;
     private final BrandRepository brandRepository;
     private final NoteRepository noteRepository;
+    private final UserRepository userRepository;
 
-    public PerfumeController(PerfumeRepository perfumeRepository, BrandRepository brandRepository, NoteRepository noteRepository)
+    public PerfumeController(PerfumeRepository perfumeRepository, BrandRepository brandRepository, NoteRepository noteRepository, UserRepository userRepository)
     {
         this.perfumeRepository = perfumeRepository;
         this.brandRepository = brandRepository;
         this.noteRepository = noteRepository;
+        this.userRepository = userRepository;
     }
 
     // get = reads/retrieves data
@@ -36,18 +40,20 @@ public class PerfumeController
             @RequestParam(required=false) String season,
             @RequestParam(required=false, defaultValue="3") int limit)
     {
+        User user=getCurrentUser();
+
         if (fetch != null) // EDITING, preloads fields
         {
-            return perfumeRepository.findByIdAndActiv(fetch, 1)
+            return perfumeRepository.findByIdAndActivAndUser(fetch, 1,user)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         }
         else if (id != null) // LAYERING
         {
-            Perfume base = perfumeRepository.findByIdAndActiv(id, 1).orElse(null);
+            Perfume base = perfumeRepository.findByIdAndActivAndUser(id, 1,user).orElse(null);
             if (base == null)
                 return ResponseEntity.notFound().build();
-            List<Perfume> all = perfumeRepository.findByActiv(1);
+            List<Perfume> all = perfumeRepository.findByActivAndUser(1,user);
             LayeringService ls = new LayeringService();
             List<Perfume> recommendations = ls.getRecommendations(base, all, limit);
             Map<String, Object> result = new HashMap<>();
@@ -72,14 +78,14 @@ public class PerfumeController
         {
             try {
                 Season s = Season.valueOf(season.trim().toUpperCase());
-                return ResponseEntity.ok(perfumeRepository.searchBySeason(s));
+                return ResponseEntity.ok(perfumeRepository.searchBySeason(s, user));
             } catch (IllegalArgumentException e) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid season."));
             }
         }
         else // LOADS ALL PERFUMES
         {
-            return ResponseEntity.ok(perfumeRepository.findByActiv(1));
+            return ResponseEntity.ok(perfumeRepository.findByActivAndUser(1,user));
         }
     }
 
@@ -88,10 +94,11 @@ public class PerfumeController
     @Transactional
     public ResponseEntity<?> addPerfume(@RequestBody Map<String, Object> body)
     {
+        User user=getCurrentUser();
         String name  = (String) body.get("name");
         String brandName = (String) body.get("brand");
         Optional<Perfume> existing = perfumeRepository
-                .findByNameIgnoreCaseAndBrand_NameIgnoreCase(name, brandName);
+                .findByNameIgnoreCaseAndBrand_NameIgnoreCaseAndUser(name, brandName,user);
         if (existing.isPresent()) // already exists?
         {
             Perfume p = existing.get();
@@ -107,7 +114,8 @@ public class PerfumeController
         }
 
         // new perfume
-        Perfume p = buildPerfume(body);
+        User currentUser = getCurrentUser();
+        Perfume p = buildPerfume(body, currentUser);
         perfumeRepository.save(p);
         attachNotes(p, body);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -119,8 +127,9 @@ public class PerfumeController
     @Transactional
     public ResponseEntity<?> updatePerfume(@RequestBody Map<String, Object> body)
     {
+        User user=getCurrentUser();
         int id = (Integer) body.get("id");
-        Perfume p = perfumeRepository.findByIdAndActiv(id, 1).orElse(null);
+        Perfume p = perfumeRepository.findByIdAndActivAndUser(id, 1,user).orElse(null);
         if (p == null)
             return ResponseEntity.notFound().build();
         String brandName = (String) body.get("brand");
@@ -151,7 +160,8 @@ public class PerfumeController
     @DeleteMapping
     public ResponseEntity<?> deletePerfume(@RequestParam int id)
     {
-        return perfumeRepository.findByIdAndActiv(id, 1)
+        User user=getCurrentUser();
+        return perfumeRepository.findByIdAndActivAndUser(id, 1,user)
                 .map(p -> {
                     p.setActiv(0);
                     perfumeRepository.save(p);
@@ -167,7 +177,7 @@ public class PerfumeController
                 .orElseGet(() -> brandRepository.save(new Brand(brandName)));
     }
 
-    private Perfume buildPerfume(Map<String, Object> body)
+    private Perfume buildPerfume(Map<String, Object> body, User user)
     {
         String name=(String)body.get("name");
         String brandName=(String)body.get("brand");
@@ -179,6 +189,7 @@ public class PerfumeController
         Brand brand = resolveBrand(brandName);
         Perfume p = new Perfume(name, brand, ml, type);
         p.setRating(rating);
+        p.setUser(user);
 
         if (seasonsRaw != null && !seasonsRaw.trim().isEmpty())
             for (String s : seasonsRaw.split(","))
@@ -211,5 +222,22 @@ public class PerfumeController
                 seenNotes.add(aux);
             }
         }
+    }
+
+    private User getCurrentUser()
+    {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof User user) {
+            return user;
+        } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            return userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        } else if (principal instanceof String username) {
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
+
+        throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
     }
 }

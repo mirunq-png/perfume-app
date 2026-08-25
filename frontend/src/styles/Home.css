@@ -90,3 +90,22 @@
     height: 360px;
   }
 }
+.logout-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: transparent;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--accent);
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.logout-btn:hover {
+  background: var(--accent);
+  color: white;
+}

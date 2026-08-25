@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PerfumeForm from '../components/PerfumeForm';
+import { api } from '../utils/api';
 import '../styles/AddEdit.css';
 
 export default function Edit() {
@@ -17,7 +18,7 @@ export default function Edit() {
 
   const loadPerfume = async () => {
     try {
-      const response = await fetch(`/api/perfume?fetch=${id}`);
+      const response = await api.get(`/api/perfume?fetch=${id}`);
       if (!response.ok) throw new Error('Perfume not found');
       const data = await response.json();
       setPerfume(data);
@@ -33,12 +34,7 @@ export default function Edit() {
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/perfume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, id }),
-      });
-
+      const response = await api.put('/api/perfume', { ...formData, id: parseInt(id) });
       if (!response.ok) throw new Error('Failed to update perfume');
       navigate('/collection');
     } catch (err) {
@@ -49,13 +45,20 @@ export default function Edit() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const response = await api.delete(`/api/perfume?id=${id}`);
+      if (!response.ok) throw new Error('Failed to delete perfume');
+      navigate('/collection');
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Error deleting perfume: ' + err.message);
+    }
+  };
+
   if (pageLoading) {
     return (
-      <motion.div
-        className="loading-container"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      >
+      <motion.div className="loading-container" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>
         Loading perfume...
       </motion.div>
     );
@@ -70,15 +73,19 @@ export default function Edit() {
       transition={{ duration: 0.3 }}
     >
       <div className="form-page-header">
-        <button className="back-btn" onClick={() => navigate('/collection')}>
-          ← Back
-        </button>
+        <button className="back-btn" onClick={() => navigate('/collection')}>← Back</button>
         <h1>Edit perfume</h1>
         <div style={{ width: '60px' }}></div>
       </div>
-
       <div className="form-page-content">
-        {perfume && <PerfumeForm onSubmit={handleSubmit} loading={loading} initialData={perfume} />}
+        {perfume && (
+          <PerfumeForm
+            onSubmit={handleSubmit}
+            loading={loading}
+            initialData={perfume}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </motion.div>
   );

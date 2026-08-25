@@ -46,6 +46,10 @@ public class Perfume
     @Enumerated(EnumType.STRING)
     private Set<Season> seasons = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable=false)
+    private User user;
+
     public Perfume() {}
     public Perfume(String name, Brand brand, int ml, Type type)
     {
@@ -109,6 +113,8 @@ public class Perfume
     public void setActiv(int activ) {
         this.activ = activ;
     }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     @Override
     public String toString()
