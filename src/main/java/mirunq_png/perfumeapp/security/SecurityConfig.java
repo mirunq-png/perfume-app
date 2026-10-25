@@ -58,6 +58,8 @@ public class SecurityConfig
                         .requestMatchers("/assets/**").permitAll()
                         .requestMatchers("/index.html").permitAll()
                         .requestMatchers("/index.html", "/").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -97,7 +99,7 @@ public class SecurityConfig
                 .map(user -> org.springframework.security.core.userdetails.User
                         .withUsername(user.getUsername())
                         .password(user.getPassword())
-                        .authorities(List.of())
+                        .authorities("ROLE_" + user.getRole().name())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }

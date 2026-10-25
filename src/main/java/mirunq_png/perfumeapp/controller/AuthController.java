@@ -126,6 +126,22 @@ public class AuthController
                 .body(Map.of("message", "Logged out successfully."));
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody LoginRequest request)
+    {
+        if (userRepository.findByUsername(request.getUsername()).isPresent())
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "Username already taken."));
+
+        User user = new User(
+                request.getUsername(),
+                passwordEncoder.encode(request.getPassword())
+        );
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "User registered successfully!"));
+    }
+
     private String issueRefreshToken(Integer userId, UUID familyId)
     {
         String raw = UUID.randomUUID() + "." + UUID.randomUUID(); // opaque token for refresh

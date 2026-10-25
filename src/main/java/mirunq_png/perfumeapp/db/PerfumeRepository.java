@@ -3,6 +3,7 @@ package mirunq_png.perfumeapp.db;
 import mirunq_png.perfumeapp.model.Perfume;
 import mirunq_png.perfumeapp.model.Season;
 import mirunq_png.perfumeapp.model.User;
+import mirunq_png.perfumeapp.model.dto.SeasonCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,13 @@ public interface PerfumeRepository extends JpaRepository<Perfume,Integer>
             "and p.activ=1 " +
             "and p.user=:user")
     List<Perfume> searchBySeason(@Param("season") Season season, @Param("user") User user);
+    @Query("""
+        select new mirunq_png.perfumeapp.model.dto.SeasonCount(s, count(p))
+        from Perfume p
+        join p.seasons s
+        where p.activ = 1
+        group by s
+        order by count(p) desc
+        """)
+    List<SeasonCount> countBySeason();
 }
