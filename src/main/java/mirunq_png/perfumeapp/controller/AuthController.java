@@ -2,7 +2,9 @@ package mirunq_png.perfumeapp.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import mirunq_png.perfumeapp.db.RefreshTokenRepository;
 import mirunq_png.perfumeapp.db.UserRepository;
+import mirunq_png.perfumeapp.model.RefreshToken;
 import mirunq_png.perfumeapp.model.User;
 import mirunq_png.perfumeapp.model.dto.AuthResponse;
 import mirunq_png.perfumeapp.model.dto.LoginRequest;
@@ -17,7 +19,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -27,16 +36,19 @@ public class AuthController
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public AuthController(UserRepository userRepository,
                           PasswordEncoder passwordEncoder,
                           AuthenticationManager authenticationManager,
-                          JwtUtils jwtUtils)
+                          JwtUtils jwtUtils,
+                          RefreshTokenRepository refreshTokenRepository)
     {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @PostMapping("/login")
@@ -45,80 +57,108 @@ public class AuthController
         try
         {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    )
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
-        }
-        catch (BadCredentialsException e)
+        } catch (BadCredentialsException e)
         {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid username or password."));
         }
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow();
-        String token = jwtUtils.generateToken(user.getUsername());
+        User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
+        String accessToken = jwtUtils.generateAccessToken(user.getUsername());
+        String rawRefreshToken = issueRefreshToken(user.getId(), UUID.randomUUID());
 
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(86400)
-                .sameSite("Lax")
-                .build();
+        ResponseCookie refreshCookie = buildRefreshCookie(rawRefreshToken, 60L * 60 * 24 * 30); // 30 days
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(Map.of("username", user.getUsername(), "message", "Login successful!"));
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(Map.of("accessToken", accessToken, "username", user.getUsername()));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@CookieValue(name = "refresh_token", required = false) String rawRefreshToken)
+    {
+        if (rawRefreshToken == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(hash(rawRefreshToken)).orElse(null);
+
+        if (stored == null || stored.getExpiresAt().isBefore(Instant.now()))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        if (stored.isUsed()) // reuse detected: kill the whole chain
+        {
+            refreshTokenRepository.deleteByFamilyId(stored.getFamilyId());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Session invalidated. Please log in again."));
+        }
+
+        User user = userRepository.findById(stored.getUserId()).orElse(null);
+        if (user == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        stored.setUsed(true);
+        refreshTokenRepository.save(stored);
+
+        String newAccessToken = jwtUtils.generateAccessToken(user.getUsername());
+        String newRawRefreshToken = issueRefreshToken(user.getId(), stored.getFamilyId());
+
+        ResponseCookie refreshCookie = buildRefreshCookie(newRawRefreshToken, 60L * 60 * 24 * 30);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(Map.of("accessToken", newAccessToken, "username", user.getUsername()));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout()
+    public ResponseEntity<?> logout(@CookieValue(name = "refresh_token", required = false) String rawRefreshToken)
     {
-        ResponseCookie cookie = ResponseCookie.from("jwt", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax")
-                .build();
-
+        if (rawRefreshToken != null)
+        {
+            refreshTokenRepository.findByTokenHash(hash(rawRefreshToken))
+                    .ifPresent(t -> refreshTokenRepository.deleteByFamilyId(t.getFamilyId()));
+        }
+        ResponseCookie cleared = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true).secure(false).path("/api/auth/refresh").maxAge(0).sameSite("Lax").build();
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, cleared.toString())
                 .body(Map.of("message", "Logged out successfully."));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody LoginRequest request)
+    private String issueRefreshToken(Integer userId, UUID familyId)
     {
-        if (userRepository.findByUsername(request.getUsername()).isPresent())
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Username already taken."));
-
-        User user = new User(
-                request.getUsername(),
-                passwordEncoder.encode(request.getPassword())
-        );
-        userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("message", "User registered successfully!"));
+        String raw = UUID.randomUUID() + "." + UUID.randomUUID(); // opaque token for refresh
+        RefreshToken rt = new RefreshToken();
+        rt.setTokenHash(hash(raw));
+        rt.setUserId(userId);
+        rt.setExpiresAt(Instant.now().plus(30, ChronoUnit.DAYS));
+        rt.setFamilyId(familyId);
+        refreshTokenRepository.save(rt);
+        return raw;
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> me(HttpServletRequest request) // react calls this on load to check if the cookie is still valid
+    private ResponseCookie buildRefreshCookie(String value, long maxAgeSeconds)
     {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        for (Cookie cookie : cookies)
+        return ResponseCookie.from("refresh_token", value)
+                .httpOnly(true)
+                .secure(false) // will be changed later
+                .path("/api/auth/refresh")
+                .maxAge(maxAgeSeconds)
+                .sameSite("Lax")
+                .build();
+    }
+
+    private String hash(String raw)
+    {
+        try
         {
-            if ("jwt".equals(cookie.getName()) && jwtUtils.isTokenValid(cookie.getValue()))
-            {
-                String username = jwtUtils.extractUsername(cookie.getValue());
-                return ResponseEntity.ok(new AuthResponse(username, "Authenticated"));
-            }
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hashBytes);
+        } catch (NoSuchAlgorithmException e)
+        {
+            throw new RuntimeException(e);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }

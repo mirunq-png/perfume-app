@@ -1,53 +1,11 @@
-### IntelliJ IDEA ###
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-.kotlin
-
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-### Mac OS ###
-.DS_Store
-
-# IntelliJ internal files
+frontend/node_modules/
+frontend/dist/
+frontend/.env*
+target/
 .idea/
+.smarttomcat/
 *.iml
-gen/
-
-# Config
-src/main/resources/config.properties
-src/main/resources/db.sql
-src/main/resources/inserts.sql
-src/main/resources/dbPG.sql
-src/main/resources/insertsPG.sql
 src/main/resources/application.properties
-src/main/resources/cleanDB.sql
-src/main/resources/cleanInserts.sql
-src/main/resources/cleanDB_addition.sql
+src/main/resources/config.properties
+src/main/resources/*.sql
 src/main/resources/static/
-
-# Others
-.smarttomcat
-target
-perfume-app.iml
-.idea

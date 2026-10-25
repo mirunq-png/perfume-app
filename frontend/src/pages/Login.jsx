@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { api } from '../utils/api';
+import { api, setAccessToken } from '../utils/api';
 import '../styles/Login.css';
 
 export default function Login({ onLogin }) {
@@ -20,6 +20,7 @@ export default function Login({ onLogin }) {
       const response = await api.post('/api/auth/login', { username, password });
       if (response.status === 200) {
         const data = await response.json();
+        setAccessToken(data.AccessToken);
         onLogin(data.username);
         navigate('/');
       } else {

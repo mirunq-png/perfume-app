@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { api } from '../utils/api';
+import { api, setAccessToken } from '../utils/api';
 import '../styles/Home.css';
 
 export default function Home({ onLogout, user }) {
@@ -25,6 +25,7 @@ export default function Home({ onLogout, user }) {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+        setAccessToken(null);
       onLogout();
       navigate('/login');
     }

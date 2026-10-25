@@ -8,6 +8,7 @@ import Layer from './pages/Layer';
 import Filter from './pages/Filter';
 import Login from './pages/Login';
 import { ThemeProvider } from './context/ThemeContext';
+import { tryRefresh } from './utils/api';
 import { api } from './utils/api';
 import './styles/theme.css';
 import './App.css';
@@ -22,16 +23,15 @@ function App() {
   const [user, setUser] = useState(undefined); // undefined = checking, null = not logged in, string = username
 
   useEffect(() => {
-    //api.get('/api/auth/me') // check if cookie is still valid on app load
-    api.getNoRedirect('/api/auth/me')
-      .then(async res => {
-        if (res && res.ok) {
-          const data = await res.json();
-          setUser(data.username);
-        } else {
-          setUser(null); // not logged in but dont redirect
-        }
-      })
+   tryRefresh()
+         .then(response => {
+           if (response) {
+             // if response is an object, grab .username; otherwise just use the string
+                       setUser(typeof response === 'string' ? response : response.username);
+           } else {
+             setUser(null);
+           }
+         })
       .catch(() => setUser(null));
   }, []);
 

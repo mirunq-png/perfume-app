@@ -25,7 +25,7 @@ public class JwtUtils
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
-    public String generateToken(String username)
+    public String generateAccessToken(String username)
     {
         return Jwts.builder()
                 .subject(username)
@@ -59,4 +59,5 @@ public class JwtUtils
             return false;
         }
     }
+
 }
