@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { api, setAccessToken } from '../utils/api';
 import '../styles/Login.css';
@@ -20,7 +21,7 @@ export default function Login({ onLogin }) {
       const response = await api.post('/api/auth/login', { username, password });
       if (response.status === 200) {
         const data = await response.json();
-        setAccessToken(data.AccessToken);
+        setAccessToken(data.accessToken);
         onLogin(data.username);
         navigate('/');
       } else {
@@ -40,7 +41,13 @@ export default function Login({ onLogin }) {
       <button className="theme-toggle" onClick={toggleTheme} title="Toggle dark mode">
         {isDark ? '☀️' : '🌙'}
       </button>
-      <div className="login-card">
+
+      <motion.div
+        className="login-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
         <h1>Welcome!</h1>
         <br/>
         <form onSubmit={handleSubmit} className="login-form">
@@ -70,8 +77,18 @@ export default function Login({ onLogin }) {
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
+          <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '0.9rem' }}>
+            Don't have an account?{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/register')}
+              style={{ background: 'none', border: 'none', color: '#ff6699', cursor: 'pointer', padding: 0, fontSize: '0.9rem' }}
+            >
+              Register now!
+            </button>
+          </p>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

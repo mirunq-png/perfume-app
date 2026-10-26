@@ -7,6 +7,7 @@ import Edit from './pages/Edit';
 import Layer from './pages/Layer';
 import Filter from './pages/Filter';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import { ThemeProvider } from './context/ThemeContext';
 import { tryRefresh } from './utils/api';
 import { api } from './utils/api';
@@ -51,6 +52,10 @@ function App() {
             user ? <Navigate to="/" replace /> : // already logged in, skip login page
             <Login onLogin={handleLogin} />
           } />
+            <Route path="/register" element={
+                  user ? <Navigate to="/" replace /> :
+                  <Register />
+            } />
           <Route path="/" element={
             <ProtectedRoute user={user}>
               <Home onLogout={handleLogout} user={user} />

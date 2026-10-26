@@ -106,3 +106,15 @@
   transform: none;
   box-shadow: none;
 }
+
+.login-success {
+  background-color: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
