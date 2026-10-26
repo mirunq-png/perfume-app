@@ -11,7 +11,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { tryRefresh } from './utils/api';
 import { api } from './utils/api';
 import './styles/theme.css';
-import './App.css';
+import './styles/App.css';
 
 function ProtectedRoute({ user, children }) {
   if (user === null) return <Navigate to="/login" replace />; // not logged in
