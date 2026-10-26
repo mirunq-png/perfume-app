@@ -23,7 +23,8 @@ public class AdminController
     {
         return Map.of(
                 "notes", stats.notes(),
-                "seasons", stats.seasons()
+                "seasons", stats.seasons(),
+                "brands",stats.brands()
         );
     }
 }

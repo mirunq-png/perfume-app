@@ -3,6 +3,7 @@ package mirunq_png.perfumeapp.db;
 import mirunq_png.perfumeapp.model.Perfume;
 import mirunq_png.perfumeapp.model.Season;
 import mirunq_png.perfumeapp.model.User;
+import mirunq_png.perfumeapp.model.dto.BrandCount;
 import mirunq_png.perfumeapp.model.dto.SeasonCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,4 +37,13 @@ public interface PerfumeRepository extends JpaRepository<Perfume,Integer>
         order by count(p) desc
         """)
     List<SeasonCount> countBySeason();
+    @Query("""
+        select new mirunq_png.perfumeapp.model.dto.BrandCount(b.name, count(p))
+        from Perfume p
+        join p.brand b
+        where p.activ = 1
+        group by b.id, b.name
+        order by count(p) desc, b.name
+        """)
+    List<BrandCount> countByBrand();
 }

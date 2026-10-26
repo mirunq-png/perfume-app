@@ -2,6 +2,7 @@ package mirunq_png.perfumeapp.service;
 
 import mirunq_png.perfumeapp.db.PerfumeNoteRepository;
 import mirunq_png.perfumeapp.db.PerfumeRepository;
+import mirunq_png.perfumeapp.model.dto.BrandCount;
 import mirunq_png.perfumeapp.model.dto.NoteCount;
 import mirunq_png.perfumeapp.model.dto.SeasonCount;
 import org.springframework.stereotype.Service;
@@ -23,4 +24,5 @@ public class AdminStatsService
 
     public List<NoteCount> notes() { return perfumeNoteRepository.countByNote(); }
     public List<SeasonCount> seasons() { return perfumeRepository.countBySeason(); }
+    public List<BrandCount> brands() { return perfumeRepository.countByBrand(); }
 }

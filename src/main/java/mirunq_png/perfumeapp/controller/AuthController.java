@@ -73,7 +73,7 @@ public class AuthController
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(Map.of("accessToken", accessToken, "username", user.getUsername()));
+                .body(Map.of("accessToken", accessToken, "username", user.getUsername(), "role",user.getRole().name()));
     }
 
     @PostMapping("/refresh")
@@ -108,7 +108,7 @@ public class AuthController
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(Map.of("accessToken", newAccessToken, "username", user.getUsername()));
+                .body(Map.of("accessToken", newAccessToken, "username", user.getUsername(),"role",user.getRole().name()));
     }
 
     @PostMapping("/logout")
