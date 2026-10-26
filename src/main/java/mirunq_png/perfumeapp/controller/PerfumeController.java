@@ -72,7 +72,7 @@ public class PerfumeController
         }
         else if (note != null) // NOTE SEARCHING
         {
-            return ResponseEntity.ok(perfumeRepository.searchByNote(note));
+            return ResponseEntity.ok(perfumeRepository.searchByNote(note,user));
         }
         else if (season != null) // SEASON SEARCHING
         {

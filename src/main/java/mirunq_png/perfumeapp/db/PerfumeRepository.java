@@ -21,9 +21,9 @@ public interface PerfumeRepository extends JpaRepository<Perfume,Integer>
     Optional<Perfume> findByIdAndActivAndUser(int id, int activ, User user); // <=> getPerfumeById with check for activ=1
     Optional<Perfume> findByNameIgnoreCaseAndBrand_NameIgnoreCaseAndUser(String name, String brandName, User user);
     @Query("select p from Perfume p join p.notes pn where upper(pn.note.name) like upper(concat('%',:noteName,'%')) " +
-            "and p.activ=1" +
+            "and p.activ=1 " +
             "and p.user=:user")
-    List<Perfume> searchByNote(@Param("noteName") String noteName);
+    List<Perfume> searchByNote(@Param("noteName") String noteName, @Param("user") User user);
     @Query("select p from Perfume p join p.seasons s where s = :season " +
             "and p.activ=1 " +
             "and p.user=:user")
