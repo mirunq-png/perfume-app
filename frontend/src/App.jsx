@@ -9,8 +9,7 @@ import Filter from './pages/Filter';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { ThemeProvider } from './context/ThemeContext';
-import { tryRefresh } from './utils/api';
-import { api } from './utils/api';
+import { tryRefresh, api, setAccessToken } from './utils/api';
 import './styles/theme.css';
 import './styles/App.css';
 
@@ -40,9 +39,16 @@ function App() {
     setUser(username);
   }
 
-  function handleLogout() {
-    setUser(null);
-  }
+  async function handleLogout() {
+      try {
+        await api.post('/api/auth/logout');
+      } catch (error) {
+        console.error('Logout request failed:', error);
+      } finally {
+        setAccessToken(null);
+        setUser(null);
+      }
+    }
 
   return (
     <ThemeProvider>
