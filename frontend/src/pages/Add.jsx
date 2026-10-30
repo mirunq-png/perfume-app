@@ -13,11 +13,15 @@ export default function Add() {
     setLoading(true);
     try {
       const response = await api.post('/api/perfume', formData);
-      if (!response.ok) throw new Error('Failed to save perfume');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to save perfume');
+      if (response.status===200) alert(data.message);
       navigate('/collection');
     } catch (err) {
       console.error('Error:', err);
-      alert('Error saving perfume: ' + err.message);
+      alert(err.message);
+      if (err.message.includes('already in your collection'))
+        navigate(0); // refreshes page to reset the form
     } finally {
       setLoading(false);
     }

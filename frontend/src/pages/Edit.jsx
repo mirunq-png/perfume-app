@@ -46,6 +46,9 @@ export default function Edit() {
   };
 
   const handleDelete = async () => {
+      const ok=window.confirm("Are you sure you want to delete this perfume?");
+      if (!ok)
+        return;
     try {
       const response = await api.delete(`/api/perfume?id=${id}`);
       if (!response.ok) throw new Error('Failed to delete perfume');

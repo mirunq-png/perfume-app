@@ -230,13 +230,13 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null, onD
     }
 
     const submitData = {
-      name: formData.name.trim(),
-      brand: finalBrand,
+      name: formData.name.trim().toUpperCase(),
+      brand: finalBrand.toUpperCase(),
       ml: parseInt(formData.ml),
       type: formData.type,
-      topNotes: formData.topNotes.trim(),
-      heartNotes: formData.heartNotes.trim(),
-      baseNotes: formData.baseNotes.trim(),
+      topNotes: formData.topNotes.trim().toUpperCase(),
+      heartNotes: formData.heartNotes.trim().toUpperCase(),
+      baseNotes: formData.baseNotes.trim().toUpperCase(),
       rating: formData.rating ? parseFloat(formData.rating) : null,
       seasons: formData.seasons.join(', '),
       fragranticaUrl: formData.fragranticaUrl.trim() || null,
@@ -429,7 +429,7 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null, onD
           id="topNotes"
           name="topNotes"
           className={missingFields.includes('top notes') ? 'warning-border' : ''}
-          value={formatText(formData.topNotes)}
+          value={formData.topNotes}
           onChange={handleChange}
           placeholder="e.g. strawberry, lemon (comma separated)"
         />
@@ -445,7 +445,7 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null, onD
           id="heartNotes"
           name="heartNotes"
           className={missingFields.includes('heart notes') ? 'warning-border' : ''}
-          value={formatText(formData.heartNotes)}
+          value={formData.heartNotes}
           onChange={handleChange}
           placeholder="e.g. orange blossom, jasmine (comma separated)"
         />
@@ -461,7 +461,7 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null, onD
           id="baseNotes"
           name="baseNotes"
           className={missingFields.includes('base notes') ? 'warning-border' : ''}
-          value={formatText(formData.baseNotes)}
+          value={formData.baseNotes}
           onChange={handleChange}
           placeholder="e.g. musk, vanilla (comma separated)"
           required
@@ -508,7 +508,7 @@ export default function PerfumeForm({ onSubmit, loading, initialData = null, onD
           placeholder="e.g. 9.5"
           min="0"
           max="10"
-          step="0.1"
+          step="0.5"
         />
       </div>
 
